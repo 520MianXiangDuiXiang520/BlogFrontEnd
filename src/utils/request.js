@@ -8,7 +8,7 @@ const debounceErr = debounce(msg => {
 }, 200);
 
 const instance = axios.create({
-    baseURL: "http://127.0.0.1:8080/api",
+    baseURL: "http://106.54.197.74:8080/api",
     headers: { "Content-Type": "application/json" },
     withCredentials: true,
     timeout: 60 * 1000, // 请求超时秒数

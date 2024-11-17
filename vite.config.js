@@ -21,20 +21,6 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
-  server: {
-    proxy: {
-      "/proxyapi": {
-        target: ServerAddr,
-        changeOrigin: true,
-        rewrite:path => path.replace(/^\/proxyapi/,'/api'),
-        // configure: (proxy, options) => {
-        //   proxy.on("proxyRes", (proxyRes, req, res) => {
-        //     proxyRes.headers["x-proxy-url"] = ServerAddr + req.originalUrl;
-        //   });
-        // },
-      },
-    },
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
