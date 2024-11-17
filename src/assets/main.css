@@ -1,0 +1,21 @@
+@import './base.css';
+
+:root {
+  --bPageBgColor: #f5f5f5;
+  --bTextColor: #191919;
+  --menuBorderColor: #CFD3DC;
+  --titleColor: #7B5D2B;
+}
+
+html.dark {
+  --bPageBgColor: #0a0a0a;
+  --bTextColor: #E5EAF3;
+  --menuBorderColor: #414243;
+  --titleColor:#84a2d4;
+}
+
+body {
+  display: flex;
+  background-color: var(--bPageBgColor);
+  color: var(--bTextColor);
+}
