@@ -170,7 +170,7 @@ onMounted(() => {
 
                 <el-row class="abstract" @click="goDetail(article['Id'])">
                     <el-col :span="24">
-                        <el-text size="default">{{ article["Abstract"] }}</el-text>
+                        <el-text size="default">{{ article["abstract"] }}</el-text>
                     </el-col>
                 </el-row>
             </el-col>
