@@ -14,19 +14,28 @@ const theme = computed(() => dark.value ? 'dark' : 'default');
 
 const id = 'preview-only';
 const text = ref(`# this is test page`);
-
+const isLoaded = ref(false); // 标记是否加载完成
 function articleDetailReq() {
     var api = "/article/detail/"+route.params.id;
     var params = {}
 
-    instance.get(api, params).then((res) => {
-        console.log(res)
-        if (res["code"] == 200) {
-            text.value = res["text"]
-        }
-    }).catch((err) => {
-        console.log(err)
-    })
+    instance
+        .get(api)
+        .then((res) => {
+            console.log(res);
+            if (res["code"] === 200) {
+                text.value = res["text"];
+            } else {
+                text.value = "Failed to load the article. Please try again.";
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            text.value = "Error loading the article.";
+        })
+        .finally(() => {
+            isLoaded.value = true; // 数据加载完成
+        });
 }
 
 onMounted(() => {
@@ -34,10 +43,13 @@ onMounted(() => {
 })
 
 </script>
-
 <template>
-    <MdPreview :editorId="id" :modelValue="text" :theme="theme" />
-    {{ $route.params.id }}
+    <!-- 数据未加载完成时显示加载提示 -->
+    <div v-if="!isLoaded">Loading...</div>
+    <!-- 数据加载完成后显示内容 -->
+    <div v-else>
+        <MdPreview :editorId="id" :modelValue="text" :theme="theme" />
+    </div>
 </template>
 ```
 
