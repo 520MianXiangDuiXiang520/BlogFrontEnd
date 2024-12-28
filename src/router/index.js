@@ -34,6 +34,11 @@ const router = createRouter({
       path: '/tools',
       name: 'tools',
       component: () => import('../views/ToolsView.vue')
+    },
+    {
+      path: '/date_tool',
+      name: 'date_tool',
+      component: () => import('../components/ToolDate.vue')
     }
   ]
 })
