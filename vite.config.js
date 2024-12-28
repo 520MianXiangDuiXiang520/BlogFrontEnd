@@ -20,6 +20,14 @@ export default defineConfig({
     Components({
       resolvers: [ElementPlusResolver()],
     }),
+    {
+      name: 'md-loader',
+      transform(code, id) {
+        if (id.endsWith('.md')) {
+          return `export default ${JSON.stringify(code)}`;
+        }
+      }
+    }
   ],
   resolve: {
     alias: {
@@ -28,3 +36,7 @@ export default defineConfig({
   },
   
 })
+
+
+
+
