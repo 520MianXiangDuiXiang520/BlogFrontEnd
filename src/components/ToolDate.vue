@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { formatDate, date2STimestamp, date2MsTimestamp, timestamp2time } from '@/utils/date'
 import { copyToClipboard } from '@/utils/clipboard'
-import { VideoPause, VideoPlay, CopyDocument } from '@element-plus/icons-vue'
+import { VideoPause, VideoPlay, CopyDocument, Clock, Timer, Calendar, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
 import moment from 'moment-timezone';
 // import Map from './map.vue'
 
@@ -173,10 +173,16 @@ onBeforeUnmount(() => {
 
 <template>
     <div>
-        <h1>时间日期转换工具</h1>
+        <h1 class="page-title">
+            <el-icon class="title-icon"><Clock /></el-icon>
+            时间日期转换工具
+        </h1>
 
         <el-card class="use-bgc space-12">
-            <h3 class="card-title">当前时间</h3>
+            <h3 class="card-title">
+                <el-icon class="title-icon"><Timer /></el-icon>
+                当前时间
+            </h3>
             <el-row class="space-8">
                 <el-col :span="8" @click="copyToClipboard(formatDate(nowTime))">
                     <el-tooltip content="点击复制" placement="bottom">
@@ -218,7 +224,10 @@ onBeforeUnmount(() => {
 -->
 
         <el-card class="use-bgc space-12">
-            <h3 class="space-8">时间戳转时间</h3>
+            <h3 class="card-title">
+                <el-icon class="title-icon arrow-right"><ArrowRight /></el-icon>
+                时间戳转时间
+            </h3>
 
             <el-row class="space-12 tool-row">
                 <el-col :span="9">
@@ -253,7 +262,10 @@ onBeforeUnmount(() => {
         </el-card>
 
         <el-card class="use-bgc space-12">
-            <h3 class="space-8">时间转时间戳</h3>
+            <h3 class="card-title">
+                <el-icon class="title-icon arrow-left"><ArrowLeft /></el-icon>
+                时间转时间戳
+            </h3>
 
             <el-row class="space-12 tool-row">
                 <el-col :span="9">
@@ -289,6 +301,23 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+.page-title {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #303133;
+    font-size: 2em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.title-icon {
+    font-size: 1.2em;
+    color: #409eff;
+}
+
 .now-number {
     font: 2em sans-serif;
     margin-right: 7px;
@@ -337,12 +366,31 @@ onBeforeUnmount(() => {
 }
 
 .card-title {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     color: #303133;
+    font-size: 1.3em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-title .title-icon {
+    font-size: 1.1em;
+    color: #67c23a;
+}
+
+.card-title .title-icon.arrow-right {
+    color: #409eff;
+}
+
+.card-title .title-icon.arrow-left {
+    color: #e6a23c;
 }
 
 .use-bgc {
     background-color: #fafafa;
+    margin-bottom: 16px;
 }
 
 /* 让复制按钮与输入框高度一致 */
