@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import instance from "@/utils/request";
 import { useRouter, useRoute } from 'vue-router'
 import { checkLogined, checkAuth } from "@/utils/auth"
-import { formatTimestamp } from '@/utils/date'
+import { formatDateByTimestamp } from '@/utils/date'
 import { storage } from '@/utils/storage'
 
 const router = useRouter()
@@ -156,7 +156,7 @@ onMounted(() => {
 
                         <span v-else>NoTag <el-divider direction="vertical" border-style="dashed" /></span>
 
-                        <el-text class="up-date" size="small">{{ formatTimestamp(article['create_ts']) }}</el-text>
+                        <el-text class="up-date" size="small">{{ formatDateByTimestamp(article['create_ts']) }}</el-text>
 
 
                         <el-divider v-if="checkLogined()" direction="vertical" />

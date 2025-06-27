@@ -19,3 +19,15 @@ body {
   background-color: var(--bPageBgColor);
   color: var(--bTextColor);
 }
+
+.use-bgc{
+  background-color: var(--bPageBgColor) !important;
+}
+
+.space-8{
+  margin-bottom: 8px;
+}
+
+.space-12{
+  margin-bottom: 12px;
+}

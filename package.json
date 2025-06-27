@@ -12,8 +12,10 @@
     "@kangc/v-md-editor": "^2.3.18",
     "@vueuse/core": "^11.2.0",
     "axios": "^1.7.7",
+    "crypto-js": "^4.2.0",
     "element-plus": "^2.8.7",
     "md-editor-v3": "^4.21.3",
+    "moment-timezone": "^0.5.46",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
     "vue3-cookies": "^1.0.6"

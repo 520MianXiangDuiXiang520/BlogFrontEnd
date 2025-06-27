@@ -16,6 +16,10 @@ import '@kangc/v-md-editor/lib/style/preview.css';
 import createLineNumbertPlugin from '@kangc/v-md-editor/lib/plugins/line-number/index';
 import hljs from 'highlight.js';
 import VueCookies from 'vue3-cookies'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
+
+
 
 VMdPreview.use(githubTheme, {
   Hljs: hljs,
@@ -32,3 +36,6 @@ const app = createApp(App)
 app.use(router).use(VMdEditor).use(VMdPreview).use(VueCookies)
 
 app.mount('#app')
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
