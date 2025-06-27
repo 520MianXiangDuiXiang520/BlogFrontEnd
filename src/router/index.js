@@ -39,6 +39,21 @@ const router = createRouter({
       path: '/date_tool',
       name: 'date_tool',
       component: () => import('../components/ToolDate.vue')
+    },
+    {
+      path: '/hex_tool',
+      name: 'hex_tool',
+      component: () => import('../components/ToolHex.vue')
+    },
+    {
+      path: '/base64_tool',
+      name: 'base64_tool',
+      component: () => import('../components/ToolBase64.vue')
+    },
+    {
+      path: '/hash_tool',
+      name: 'hash_tool',
+      component: () => import('../components/ToolHash.vue')
     }
   ]
 })
