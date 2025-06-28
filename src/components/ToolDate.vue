@@ -183,22 +183,22 @@ onBeforeUnmount(() => {
                 <el-icon class="title-icon"><Timer /></el-icon>
                 当前时间
             </h3>
-            <el-row class="space-8">
-                <el-col :span="8" @click="copyToClipboard(formatDate(nowTime))">
+            <el-row class="space-8" :gutter="16">
+                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(formatDate(nowTime))">
                     <el-tooltip content="点击复制" placement="bottom">
                         <p class="clickable">
                             <span class="now-number">{{ formatDate(nowTime) }}</span>
                         </p>
                     </el-tooltip>
                 </el-col>
-                <el-col :span="8" @click="copyToClipboard(date2MsTimestamp(nowTime))">
+                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(date2MsTimestamp(nowTime))">
                     <el-tooltip content="点击复制" placement="bottom">
                         <p class="clickable">
                             <span class="now-number">{{ date2MsTimestamp(nowTime) }}</span><span>毫秒 </span>
                         </p>
                     </el-tooltip>
                 </el-col>
-                <el-col :span="6" @click="copyToClipboard(date2STimestamp(nowTime))">
+                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(date2STimestamp(nowTime))">
                     <el-tooltip content="点击复制" placement="bottom">
                         <p class="clickable">
                             <span class="now-number">{{ date2STimestamp(nowTime) }}</span><span>秒</span>
@@ -207,8 +207,10 @@ onBeforeUnmount(() => {
                 </el-col>
             </el-row>
 
-            <el-button :icon="VideoPlay" type="success" v-if="timerStoped" @click="restartInterval()"> 开始 </el-button>
-            <el-button :icon="VideoPause" type="danger" v-else @click="pauseInterval()"> 停止 </el-button>
+            <div class="button-group">
+                <el-button :icon="VideoPlay" type="success" v-if="timerStoped" @click="restartInterval()"> 开始 </el-button>
+                <el-button :icon="VideoPause" type="danger" v-else @click="pauseInterval()"> 停止 </el-button>
+            </div>
         </el-card>
 
 
@@ -229,8 +231,8 @@ onBeforeUnmount(() => {
                 时间戳转时间
             </h3>
 
-            <el-row class="space-12 tool-row">
-                <el-col :span="9">
+            <el-row class="space-12 tool-row" :gutter="16">
+                <el-col :xs="24" :sm="24" :md="10" :lg="9">
                     <el-input v-model="inputTimeTamp" size="large" placeholder="请输入时间戳"
                         class="input-with-select" @input="onTampInput">
                         <template #append>
@@ -242,15 +244,15 @@ onBeforeUnmount(() => {
                     </el-input>
                 </el-col>
                
-                <el-col :span="4">
+                <el-col :xs="24" :sm="12" :md="6" :lg="4">
                     <el-select v-model="selectTimeZone" filterable placeholder="Asia/Shanghai" size="large">
                         <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
                     </el-select>
                 </el-col>
-                <el-col :span="2">
+                <el-col :xs="24" :sm="12" :md="4" :lg="2">
                     <el-button type="default" size="large" class="transition-btn" @click="toTime">转换</el-button>
                 </el-col>
-                <el-col :span="9">
+                <el-col :xs="24" :sm="24" :md="10" :lg="9">
                     <el-input v-model="outputTime" size="large" disabled placeholder="转换结果" 
                         class="clickable-output" @click="copyToClipboard(outputTime)">
                         <template #append>
@@ -267,21 +269,21 @@ onBeforeUnmount(() => {
                 时间转时间戳
             </h3>
 
-            <el-row class="space-12 tool-row">
-                <el-col :span="9">
+            <el-row class="space-12 tool-row" :gutter="16">
+                <el-col :xs="24" :sm="24" :md="10" :lg="9">
                     <el-input v-model="inputDateTime" size="large" placeholder="请输入时间 (如: 2024/11/12 16:38:19)"
                         @input="onDateTimeInput">
                     </el-input>
                 </el-col>
-                <el-col :span="4">
+                <el-col :xs="24" :sm="12" :md="6" :lg="4">
                     <el-select v-model="selectTimeZone" filterable placeholder="Asia/Shanghai" size="large">
                         <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
                     </el-select>
                 </el-col>
-                <el-col :span="2">
+                <el-col :xs="24" :sm="12" :md="4" :lg="2">
                     <el-button type="default" size="large" class="transition-btn" @click="toTimestamp">转换</el-button>
                 </el-col>
-                <el-col :span="9">
+                <el-col :xs="24" :sm="24" :md="10" :lg="9">
                     <el-input v-model="outputTimestamp" size="large" disabled placeholder="转换结果"
                         class="input-with-select clickable-output" @click="copyToClipboard(outputTimestamp)">
                         <template #append>
@@ -300,13 +302,13 @@ onBeforeUnmount(() => {
     </div>
 </template>
 
-<style>
+<style scoped>
 .page-title {
     text-align: center;
     margin-bottom: 24px;
-    color: #303133;
-    font-size: 2em;
-    font-weight: 600;
+    color: var(--titleColor);
+    font-size: 2.5rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -314,13 +316,14 @@ onBeforeUnmount(() => {
 }
 
 .title-icon {
-    font-size: 1.2em;
-    color: #409eff;
+    font-size: 2rem;
+    color: var(--titleColor);
 }
 
 .now-number {
     font: 2em sans-serif;
     margin-right: 7px;
+    color: var(--bTextColor);
 }
 
 .clickable {
@@ -367,7 +370,7 @@ onBeforeUnmount(() => {
 
 .card-title {
     margin-bottom: 16px;
-    color: #303133;
+    color: var(--bTextColor);
     font-size: 1.3em;
     font-weight: 600;
     display: flex;
@@ -377,20 +380,23 @@ onBeforeUnmount(() => {
 
 .card-title .title-icon {
     font-size: 1.1em;
-    color: #67c23a;
+    color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-right {
-    color: #409eff;
+    color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-left {
-    color: #e6a23c;
+    color: var(--titleColor);
 }
 
 .use-bgc {
-    background-color: #fafafa;
+    background-color: var(--bPageBgColor);
     margin-bottom: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* 让复制按钮与输入框高度一致 */
@@ -401,7 +407,7 @@ onBeforeUnmount(() => {
 }
 
 .el-input .el-button:hover {
-    background-color: #f5f7fa;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 可点击的输出框样式 */
@@ -411,10 +417,164 @@ onBeforeUnmount(() => {
 }
 
 .clickable-output:hover {
-    background-color: #f5f7fa;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .clickable-output:active {
-    background-color: #e4e7ed;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 深色模式适配 */
+html.dark .use-bgc {
+    background-color: var(--bPageBgColor);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .el-input .el-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .clickable-output:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .clickable-output:active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        gap: 8px;
+    }
+    
+    .title-icon {
+        font-size: 1.4rem;
+    }
+    
+    .card-title {
+        font-size: 1.1em;
+        margin-bottom: 12px;
+    }
+    
+    .now-number {
+        font-size: 1.5em;
+    }
+    
+    .use-bgc {
+        margin-bottom: 12px;
+        padding: 16px;
+    }
+    
+    .tool-row {
+        margin-bottom: 8px;
+    }
+    
+    .space-12 {
+        margin-bottom: 8px;
+    }
+    
+    .space-8 {
+        margin-bottom: 6px;
+    }
+    
+    /* 移动端布局调整 */
+    .el-col {
+        margin-bottom: 12px;
+    }
+    
+    /* 输入框在移动端占满宽度 */
+    .el-input,
+    .el-select {
+        width: 100%;
+    }
+    
+    /* 按钮在移动端调整 */
+    .transition-btn {
+        width: 100%;
+        height: 44px;
+    }
+    
+    /* 当前时间显示在移动端垂直排列 */
+    .el-row .el-col {
+        text-align: center;
+    }
+    
+    .clickable {
+        padding: 8px;
+        border-radius: 6px;
+    }
+    
+    /* 按钮组在移动端调整 */
+    .button-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .button-group .el-button {
+        width: 100%;
+        height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.6rem;
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .title-icon {
+        font-size: 1.2rem;
+    }
+    
+    .card-title {
+        font-size: 1em;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .now-number {
+        font-size: 1.3em;
+    }
+    
+    .use-bgc {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+    
+    /* 超小屏幕下的特殊处理 */
+    .el-col {
+        width: 100% !important;
+        margin-bottom: 8px;
+    }
+    
+    .tool-row {
+        margin-bottom: 6px;
+    }
+    
+    .space-12 {
+        margin-bottom: 6px;
+    }
+    
+    /* 按钮组在超小屏幕下的调整 */
+    .button-group {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .button-group .el-button {
+        width: 100%;
+        height: 40px;
+    }
+    
+    /* 当前时间在超小屏幕下的调整 */
+    .clickable {
+        padding: 6px;
+        border-radius: 4px;
+    }
 }
 </style>

@@ -285,15 +285,52 @@ function goTool(href) {
   
   .page-title {
     font-size: 2rem;
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+  
+  .title-icon {
+    font-size: 1.6rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+  
+  .tool-group {
+    margin-bottom: 16px;
+  }
+  
+  .group-header {
+    gap: 8px;
+    padding: 6px 0;
+  }
+  
+  .group-icon {
+    font-size: 1rem;
+  }
+  
+  .group-title {
+    font-size: 1.1rem;
+  }
+  
+  .tool-count {
+    font-size: 0.8rem;
   }
   
   .tools-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+    padding: 16px 0;
   }
   
   .tool-card {
     padding: 16px;
+  }
+  
+  .tool-card-content {
+    gap: 12px;
   }
   
   .tool-icon-wrapper {
@@ -311,6 +348,191 @@ function goTool(href) {
   
   .tool-desc {
     font-size: 0.85rem;
+  }
+  
+  .tool-arrow {
+    font-size: 1rem;
+  }
+  
+  /* Element Plus 组件样式覆盖 */
+  :deep(.el-collapse-item__header) {
+    padding: 16px 20px !important;
+    font-size: 1rem;
+  }
+  
+  :deep(.el-collapse-item__content) {
+    padding: 0 20px 20px 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tools-container {
+    padding: 12px;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .title-icon {
+    font-size: 1.4rem;
+  }
+  
+  .page-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  
+  .tool-group {
+    margin-bottom: 12px;
+  }
+  
+  .group-header {
+    gap: 6px;
+    padding: 4px 0;
+  }
+  
+  .group-icon {
+    font-size: 0.9rem;
+  }
+  
+  .group-title {
+    font-size: 1rem;
+  }
+  
+  .tool-count {
+    font-size: 0.75rem;
+  }
+  
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  
+  .tool-card {
+    padding: 12px;
+  }
+  
+  .tool-card-content {
+    gap: 8px;
+  }
+  
+  .tool-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .tool-icon {
+    font-size: 1rem;
+  }
+  
+  .tool-name {
+    font-size: 0.9rem;
+  }
+  
+  .tool-desc {
+    font-size: 0.8rem;
+  }
+  
+  .tool-arrow {
+    font-size: 0.9rem;
+  }
+  
+  /* Element Plus 组件样式覆盖 */
+  :deep(.el-collapse-item__header) {
+    padding: 12px 16px !important;
+    font-size: 0.9rem;
+  }
+  
+  :deep(.el-collapse-item__content) {
+    padding: 0 16px 16px 16px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .tools-container {
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
+  }
+  
+  .title-icon {
+    font-size: 1.2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+  }
+  
+  .tool-group {
+    margin-bottom: 8px;
+  }
+  
+  .group-header {
+    gap: 4px;
+    padding: 2px 0;
+  }
+  
+  .group-icon {
+    font-size: 0.8rem;
+  }
+  
+  .group-title {
+    font-size: 0.9rem;
+  }
+  
+  .tool-count {
+    font-size: 0.7rem;
+  }
+  
+  .tools-grid {
+    gap: 6px;
+    padding: 8px 0;
+  }
+  
+  .tool-card {
+    padding: 8px;
+  }
+  
+  .tool-card-content {
+    gap: 6px;
+  }
+  
+  .tool-icon-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .tool-icon {
+    font-size: 0.9rem;
+  }
+  
+  .tool-name {
+    font-size: 0.85rem;
+  }
+  
+  .tool-desc {
+    font-size: 0.75rem;
+  }
+  
+  .tool-arrow {
+    font-size: 0.8rem;
+  }
+  
+  /* Element Plus 组件样式覆盖 */
+  :deep(.el-collapse-item__header) {
+    padding: 8px 12px !important;
+    font-size: 0.85rem;
+  }
+  
+  :deep(.el-collapse-item__content) {
+    padding: 0 12px 12px 12px !important;
   }
 }
 

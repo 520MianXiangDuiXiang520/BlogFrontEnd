@@ -7,8 +7,8 @@ import { CopyDocument, ArrowRight, ArrowLeft, Document } from '@element-plus/ico
 const inputText = ref('') // 输入文本
 const outputText = ref('') // 输出文本
 const isEncoding = ref(true) // true为编码，false为解码
-const leftWidth = ref(50) // 左侧文本框宽度百分比
 const textareaHeight = ref(6) // 文本框行数
+const isMobile = ref(false) // 移动端检测
 
 // Base64编码函数
 function encodeBase64(text) {
@@ -53,79 +53,6 @@ function processText() {
   }
 }
 
-// 拖拽调整大小
-let isDragging = false
-let startX = 0
-let startWidth = 0
-
-// 高度拖拽调整
-let isHeightDragging = false
-let startY = 0
-let startHeight = 0
-
-function startDrag(event) {
-  isDragging = true
-  startX = event.clientX
-  startWidth = leftWidth.value
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', stopDrag)
-  document.body.style.cursor = 'col-resize'
-  document.body.style.userSelect = 'none'
-}
-
-function startHeightDrag(event) {
-  isHeightDragging = true
-  startY = event.clientY
-  startHeight = textareaHeight.value
-  document.addEventListener('mousemove', onHeightDrag)
-  document.addEventListener('mouseup', stopHeightDrag)
-  document.body.style.cursor = 'row-resize'
-  document.body.style.userSelect = 'none'
-}
-
-function onDrag(event) {
-  if (!isDragging) return
-  
-  const container = document.querySelector('.resizable-container')
-  if (!container) return
-  
-  const containerRect = container.getBoundingClientRect()
-  const deltaX = event.clientX - startX
-  const containerWidth = containerRect.width
-  const newWidth = ((startWidth / 100) * containerWidth + deltaX) / containerWidth * 100
-  
-  // 限制最小和最大宽度
-  leftWidth.value = Math.max(20, Math.min(80, newWidth))
-}
-
-function onHeightDrag(event) {
-  if (!isHeightDragging) return
-  
-  const deltaY = event.clientY - startY
-  const lineHeight = 20 // 估算每行的高度
-  const deltaRows = Math.round(deltaY / lineHeight)
-  const newHeight = startHeight + deltaRows
-  
-  // 限制最小和最大高度
-  textareaHeight.value = Math.max(3, Math.min(20, newHeight))
-}
-
-function stopDrag() {
-  isDragging = false
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
-  document.body.style.cursor = ''
-  document.body.style.userSelect = ''
-}
-
-function stopHeightDrag() {
-  isHeightDragging = false
-  document.removeEventListener('mousemove', onHeightDrag)
-  document.removeEventListener('mouseup', stopHeightDrag)
-  document.body.style.cursor = ''
-  document.body.style.userSelect = ''
-}
-
 // 监听输入变化
 watch([inputText, isEncoding], () => {
   processText()
@@ -149,6 +76,17 @@ function syncTextareaHeight() {
 
 // 组件挂载后添加事件监听
 onMounted(() => {
+  // 检测移动端
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth <= 768
+  }
+  
+  // 初始检测
+  checkMobile()
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', checkMobile)
+  
   // 延迟执行，确保DOM已渲染
   setTimeout(() => {
     const inputTextarea = document.querySelector('.input-textarea textarea')
@@ -240,20 +178,18 @@ onMounted(() => {
         </el-col>
       </el-row>
 
-      <el-row class="space-16 tool-row">
-        <div class="resizable-container">
-          <div class="text-area-wrapper input-textarea" :style="{ width: leftWidth + '%' }">
+      <el-row class="space-16 tool-row" :gutter="16">
+        <el-col :xs="24" :sm="24" :md="12" :lg="12">
+          <div class="text-area-wrapper input-textarea">
             <el-input v-model="inputText" type="textarea" :rows="textareaHeight" size="large" 
               :placeholder="isEncoding ? '请输入要编码的文本' : '请输入要解码的Base64字符串'"
               @input="processText">
             </el-input>
           </div>
-          
-          <div class="resize-handle" @mousedown="startDrag">
-            <div class="resize-line"></div>
-          </div>
-          
-          <div class="text-area-wrapper output-textarea" :style="{ width: (100 - leftWidth) + '%' }">
+        </el-col>
+        
+        <el-col :xs="24" :sm="24" :md="12" :lg="12">
+          <div class="text-area-wrapper output-textarea">
             <el-input v-model="outputText" type="textarea" :rows="textareaHeight" size="large" 
               :placeholder="isEncoding ? '编码结果' : '解码结果'"
               class="clickable-output" @click="copyToClipboard(outputText)">
@@ -262,12 +198,7 @@ onMounted(() => {
               </template>
             </el-input>
           </div>
-        </div>
-        
-        <div class="height-resize-handle" @mousedown="startHeightDrag">
-          <div class="height-resize-line"></div>
-          <span class="height-indicator">{{ textareaHeight }} 行</span>
-        </div>
+        </el-col>
       </el-row>
     </el-card>
 
@@ -277,8 +208,8 @@ onMounted(() => {
         Base64编解码原理
       </h3>
 
-      <el-row>
-        <el-col :span="12">
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="24" :md="12" :lg="12">
           <h4>编码过程</h4>
           <div class="principle-diagram">
             <div class="step">
@@ -302,7 +233,7 @@ onMounted(() => {
             </div>
           </div>
         </el-col>
-        <el-col :span="12">
+        <el-col :xs="24" :sm="24" :md="12" :lg="12">
           <h4>解码过程</h4>
           <div class="principle-diagram">
             <div class="step">
@@ -332,7 +263,7 @@ onMounted(() => {
         <el-col :span="24">
           <h4>Base64字符表</h4>
           <div class="base64-table">
-            <div class="table-row">
+            <div class="table-row table-header">
               <div class="table-cell">索引</div>
               <div class="table-cell">字符</div>
               <div class="table-cell">索引</div>
@@ -381,7 +312,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .tool-base64-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -391,9 +322,9 @@ onMounted(() => {
 .page-title {
   text-align: center;
   margin-bottom: 24px;
-  color: #303133;
-  font-size: 2em;
-  font-weight: 600;
+  color: var(--titleColor);
+  font-size: 2.5rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -401,13 +332,13 @@ onMounted(() => {
 }
 
 .title-icon {
-  font-size: 1.2em;
-  color: #409eff;
+  font-size: 2rem;
+  color: var(--titleColor);
 }
 
 .card-title {
   margin-bottom: 16px;
-  color: #303133;
+  color: var(--bTextColor);
   font-size: 1.3em;
   font-weight: 600;
   display: flex;
@@ -417,15 +348,15 @@ onMounted(() => {
 
 .card-title .title-icon {
   font-size: 1.1em;
-  color: #67c23a;
+  color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-right {
-  color: #409eff;
+  color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-left {
-  color: #e6a23c;
+  color: var(--titleColor);
 }
 
 .button-row {
@@ -457,30 +388,77 @@ onMounted(() => {
   transition: width 0.1s ease;
 }
 
+/* 桌面端拖拽控制区域 */
+.desktop-resize-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
 .resize-handle {
   width: 8px;
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.1);
   cursor: col-resize;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   flex-shrink: 0;
+  height: 40px;
+  border-radius: 4px;
 }
 
 .resize-handle:hover {
-  background-color: #e0e0e0;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .resize-line {
   width: 2px;
   height: 30px;
-  background-color: #c0c0c0;
+  background-color: var(--titleColor);
   border-radius: 1px;
 }
 
 .resize-handle:hover .resize-line {
-  background-color: #409eff;
+  background-color: var(--titleColor);
+}
+
+.height-resize-handle {
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: row-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 8px;
+  border-radius: 4px;
+  padding: 0 12px;
+}
+
+.height-resize-handle:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.height-resize-line {
+  width: 40px;
+  height: 2px;
+  background-color: var(--titleColor);
+  border-radius: 1px;
+  margin-right: 8px;
+}
+
+.height-resize-handle:hover .height-resize-line {
+  background-color: var(--titleColor);
+}
+
+.height-indicator {
+  font-size: 12px;
+  color: var(--bTextColor);
+  opacity: 0.7;
+  user-select: none;
 }
 
 .tool-row {
@@ -497,10 +475,11 @@ onMounted(() => {
 }
 
 .use-bgc {
-  background-color: #fafafa;
+  background-color: var(--bPageBgColor);
   border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .clickable-output {
@@ -509,17 +488,18 @@ onMounted(() => {
 }
 
 .clickable-output:hover {
-  background-color: #f5f7fa;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .clickable-output:active {
-  background-color: #e4e7ed;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .usage-list {
   margin: 8px 0;
   padding-left: 20px;
-  color: #606266;
+  color: var(--bTextColor);
+  opacity: 0.8;
   line-height: 1.6;
 }
 
@@ -528,15 +508,16 @@ onMounted(() => {
 }
 
 .principle-diagram {
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .step {
-  background: white;
-  border: 1px solid #e4e7ed;
+  background: var(--bPageBgColor);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 12px;
   margin-bottom: 8px;
@@ -544,32 +525,32 @@ onMounted(() => {
 
 .step-title {
   font-weight: 600;
-  color: #409eff;
+  color: var(--titleColor);
   font-size: 14px;
   margin-bottom: 6px;
 }
 
 .step-content {
   font-family: 'Courier New', monospace;
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.05);
   padding: 8px;
   border-radius: 4px;
   font-size: 12px;
   word-break: break-all;
-  color: #303133;
+  color: var(--bTextColor);
 }
 
 .arrow {
   text-align: center;
   font-size: 18px;
-  color: #409eff;
+  color: var(--titleColor);
   font-weight: bold;
   margin: 8px 0;
 }
 
 .base64-table {
-  background: white;
-  border: 1px solid #e4e7ed;
+  background: var(--bPageBgColor);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 16px;
@@ -577,7 +558,7 @@ onMounted(() => {
 
 .table-row {
   display: flex;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .table-row:last-child {
@@ -586,27 +567,24 @@ onMounted(() => {
 
 .table-cell {
   flex: 1;
-  padding: 8px 12px;
+  padding: 12px;
   text-align: center;
+  color: var(--bTextColor);
+  font-family: 'Courier New', monospace;
   font-size: 14px;
-  border-right: 1px solid #f0f0f0;
-  background: #fafafa;
 }
 
-.table-row:first-child .table-cell {
-  background: #409eff;
-  color: white;
+.table-header {
+  background: rgba(255, 255, 255, 0.05);
   font-weight: 600;
-}
-
-.table-cell:last-child {
-  border-right: none;
+  color: var(--titleColor);
 }
 
 .tech-features {
   margin: 8px 0;
   padding-left: 20px;
-  color: #606266;
+  color: var(--bTextColor);
+  opacity: 0.8;
   line-height: 1.8;
 }
 
@@ -615,78 +593,131 @@ onMounted(() => {
 }
 
 .tech-features strong {
-  color: #303133;
+  color: var(--bTextColor);
 }
 
 h4 {
-  color: #303133;
+  color: var(--bTextColor);
   margin-bottom: 8px;
   font-size: 1.1em;
   font-weight: 600;
 }
 
-/* 输入框样式优化 */
-.el-input {
-  border-radius: 8px;
+/* 深色模式适配 */
+html.dark .use-bgc {
+  background-color: var(--bPageBgColor);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.el-textarea {
-  border-radius: 8px;
+html.dark .resize-handle {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 确保textarea可以resize */
-.el-textarea textarea {
-  resize: vertical;
-  min-height: 60px;
-  max-height: 400px;
+html.dark .resize-handle:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* 拖拽时的样式 */
-.el-textarea textarea:active {
-  cursor: row-resize;
+html.dark .principle-diagram {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .step {
+  background: var(--bPageBgColor);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .step-content {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .base64-table {
+  background: var(--bPageBgColor);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .table-row {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .table-header {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .tool-base64-container {
-    padding: 10px;
+    padding: 16px;
   }
   
   .page-title {
-    font-size: 1.8em;
+    font-size: 1.8rem;
     margin-bottom: 20px;
+    gap: 8px;
+  }
+  
+  .title-icon {
+    font-size: 1.4rem;
   }
   
   .card-title {
-    font-size: 1.2em;
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+  
+  .use-bgc {
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  .space-12 {
+    margin-bottom: 8px;
+  }
+  
+  .space-16 {
+    margin-bottom: 12px;
+  }
+  
+  /* 移动端按钮调整 */
+  .button-row {
+    flex-direction: column;
+    gap: 8px;
   }
   
   .action-btn {
-    min-width: 100px;
-    height: 36px;
+    min-width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  /* 移动端输入框调整 */
+  .text-area-wrapper {
+    width: 100% !important;
+    margin-bottom: 12px;
+  }
+  
+  /* 移动端输入框样式 */
+  .el-textarea textarea {
+    font-size: 14px;
+    min-height: 80px;
+  }
+  
+  /* 隐藏桌面端拖拽控制 */
+  .desktop-resize-controls {
+    display: none;
+  }
+  
+  /* 移动端表格调整 */
+  .base64-table {
     font-size: 12px;
   }
   
-  .resize-handle {
-    width: 6px;
+  .table-cell {
+    padding: 8px 4px;
+    font-size: 12px;
   }
   
-  .resize-line {
-    height: 20px;
-  }
-  
-  .height-resize-handle {
-    height: 16px;
-  }
-  
-  .height-resize-line {
-    width: 30px;
-  }
-  
-  .height-indicator {
-    font-size: 11px;
-  }
-  
+  /* 移动端步骤图调整 */
   .principle-diagram {
     padding: 12px;
   }
@@ -700,51 +731,95 @@ h4 {
     padding: 6px;
   }
   
-  .table-cell {
-    padding: 6px 8px;
-    font-size: 12px;
+  .arrow {
+    font-size: 16px;
+    margin: 6px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-base64-container {
+    padding: 12px;
   }
   
-  .tech-features {
+  .page-title {
+    font-size: 1.6rem;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .title-icon {
+    font-size: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1em;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .use-bgc {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .space-12 {
+    margin-bottom: 6px;
+  }
+  
+  .space-16 {
+    margin-bottom: 8px;
+  }
+  
+  /* 超小屏幕下的特殊处理 */
+  .action-btn {
+    height: 40px;
     font-size: 14px;
   }
-}
-
-.resize-handle:hover .resize-line {
-  background-color: #409eff;
-}
-
-.height-resize-handle {
-  height: 20px;
-  background-color: #f0f0f0;
-  cursor: row-resize;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  margin-top: 8px;
-  border-radius: 4px;
-}
-
-.height-resize-handle:hover {
-  background-color: #e0e0e0;
-}
-
-.height-resize-line {
-  width: 40px;
-  height: 2px;
-  background-color: #c0c0c0;
-  border-radius: 1px;
-  margin-right: 8px;
-}
-
-.height-resize-handle:hover .height-resize-line {
-  background-color: #409eff;
-}
-
-.height-indicator {
-  font-size: 12px;
-  color: #606266;
-  user-select: none;
+  
+  /* 超小屏幕表格调整 */
+  .base64-table {
+    font-size: 10px;
+  }
+  
+  .table-cell {
+    padding: 6px 2px;
+    font-size: 10px;
+  }
+  
+  /* 超小屏幕步骤图调整 */
+  .principle-diagram {
+    padding: 8px;
+  }
+  
+  .step {
+    padding: 6px;
+  }
+  
+  .step-content {
+    font-size: 10px;
+    padding: 4px;
+  }
+  
+  .arrow {
+    font-size: 14px;
+    margin: 4px 0;
+  }
+  
+  /* 超小屏幕输入框调整 */
+  .el-textarea textarea {
+    font-size: 13px;
+    min-height: 60px;
+  }
+  
+  /* 隐藏拖拽手柄在超小屏幕上 */
+  .resize-handle {
+    display: none;
+  }
+  
+  .text-area-wrapper {
+    margin-bottom: 12px;
+  }
 }
 </style> 

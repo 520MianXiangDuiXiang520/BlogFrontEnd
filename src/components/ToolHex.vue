@@ -149,34 +149,34 @@ watch([inputValue, inputBase, outputBase], () => {
         进制转换
       </h3>
 
-      <el-row class="space-16 tool-row">
-        <el-col :span="8">
+      <el-row class="space-16 tool-row" :gutter="16">
+        <el-col :xs="24" :sm="24" :md="10" :lg="8">
           <el-input v-model="inputValue" size="large" placeholder="请输入数值"
             @input="convertBase">
           </el-input>
         </el-col>
         
-        <el-col :span="4">
+        <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select v-model="inputBase" size="large" @change="convertBase">
             <el-option v-for="option in baseOptions" :key="option.value" 
               :label="option.label" :value="option.value" />
           </el-select>
         </el-col>
         
-        <el-col :span="2">
+        <el-col :xs="24" :sm="12" :md="4" :lg="2">
           <el-button type="primary" size="large" class="transition-btn" @click="swapBases">
             <el-icon><Switch /></el-icon>
           </el-button>
         </el-col>
         
-        <el-col :span="4">
+        <el-col :xs="24" :sm="12" :md="6" :lg="4">
           <el-select v-model="outputBase" size="large" @change="convertBase">
             <el-option v-for="option in baseOptions" :key="option.value" 
               :label="option.label" :value="option.value" />
           </el-select>
         </el-col>
         
-        <el-col :span="6">
+        <el-col :xs="24" :sm="12" :md="10" :lg="6">
           <el-input v-model="outputValue" size="large" disabled placeholder="转换结果" 
             class="clickable-output" @click="copyToClipboard(outputValue)">
             <template #append>
@@ -187,7 +187,7 @@ watch([inputValue, inputBase, outputBase], () => {
       </el-row>
 
       <el-row class="space-12" :gutter="12">
-        <el-col :span="4" v-for="option in baseOptions" :key="option.value">
+        <el-col :xs="12" :sm="6" :md="4" :lg="4" v-for="option in baseOptions" :key="option.value">
           <el-button type="success" size="default" class="quick-btn" 
             @click="quickConvert(option.value)">
             {{ option.label }}
@@ -229,7 +229,7 @@ watch([inputValue, inputBase, outputBase], () => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .tool-hex-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -239,9 +239,9 @@ watch([inputValue, inputBase, outputBase], () => {
 .page-title {
   text-align: center;
   margin-bottom: 24px;
-  color: #303133;
-  font-size: 2em;
-  font-weight: 600;
+  color: var(--titleColor);
+  font-size: 2.5rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,13 +249,13 @@ watch([inputValue, inputBase, outputBase], () => {
 }
 
 .title-icon {
-  font-size: 1.2em;
-  color: #409eff;
+  font-size: 2rem;
+  color: var(--titleColor);
 }
 
 .card-title {
   margin-bottom: 16px;
-  color: #303133;
+  color: var(--bTextColor);
   font-size: 1.3em;
   font-weight: 600;
   display: flex;
@@ -265,15 +265,15 @@ watch([inputValue, inputBase, outputBase], () => {
 
 .card-title .title-icon {
   font-size: 1.1em;
-  color: #67c23a;
+  color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-right {
-  color: #409eff;
+  color: var(--titleColor);
 }
 
 .card-title .title-icon.arrow-left {
-  color: #e6a23c;
+  color: var(--titleColor);
 }
 
 .transition-btn {
@@ -299,10 +299,11 @@ watch([inputValue, inputBase, outputBase], () => {
 }
 
 .use-bgc {
-  background-color: #fafafa;
+  background-color: var(--bPageBgColor);
   border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .quick-btn {
@@ -319,11 +320,11 @@ watch([inputValue, inputBase, outputBase], () => {
 }
 
 .clickable-output:hover {
-  background-color: #f5f7fa;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .clickable-output:active {
-  background-color: #e4e7ed;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 输入框样式优化 */
@@ -335,24 +336,225 @@ watch([inputValue, inputBase, outputBase], () => {
   border-radius: 8px;
 }
 
+/* 深色模式适配 */
+html.dark .use-bgc {
+  background-color: var(--bPageBgColor);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html.dark .clickable-output:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .clickable-output:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .tool-hex-container {
-    padding: 10px;
+    padding: 16px;
   }
   
   .page-title {
-    font-size: 1.8em;
+    font-size: 1.8rem;
     margin-bottom: 20px;
+    gap: 8px;
+  }
+  
+  .title-icon {
+    font-size: 1.4rem;
   }
   
   .card-title {
-    font-size: 1.2em;
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+  
+  .use-bgc {
+    margin-bottom: 16px;
+    padding: 16px;
+  }
+  
+  .space-12 {
+    margin-bottom: 8px;
+  }
+  
+  .space-16 {
+    margin-bottom: 12px;
+  }
+  
+  .tool-row {
+    margin-bottom: 12px;
+  }
+  
+  /* 移动端布局调整 */
+  .el-col {
+    margin-bottom: 12px;
+  }
+  
+  /* 移动端输入框调整 */
+  .el-input,
+  .el-select {
+    width: 100%;
+  }
+  
+  /* 移动端按钮调整 */
+  .transition-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  /* 移动端快速按钮调整 */
+  .quick-btn {
+    height: 40px;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  /* 移动端表格调整 */
+  .el-table {
+    font-size: 12px;
+  }
+  
+  .el-table th,
+  .el-table td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+  
+  /* 移动端输入框样式优化 */
+  .el-input {
+    border-radius: 8px;
+  }
+  
+  .el-select {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-hex-container {
+    padding: 12px;
+  }
+  
+  .page-title {
+    font-size: 1.6rem;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .title-icon {
+    font-size: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1em;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .use-bgc {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .space-12 {
+    margin-bottom: 6px;
+  }
+  
+  .space-16 {
+    margin-bottom: 8px;
+  }
+  
+  .tool-row {
+    margin-bottom: 8px;
+  }
+  
+  /* 超小屏幕下的特殊处理 */
+  .el-col {
+    width: 100% !important;
+    margin-bottom: 6px;
+  }
+  
+  /* 超小屏幕按钮调整 */
+  .transition-btn {
+    height: 40px;
+    font-size: 14px;
+  }
+  
+  .quick-btn {
+    height: 36px;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  
+  /* 超小屏幕表格调整 */
+  .el-table {
+    font-size: 10px;
+  }
+  
+  .el-table th,
+  .el-table td {
+    padding: 6px 2px;
+    font-size: 10px;
+  }
+  
+  /* 超小屏幕快速按钮网格调整 */
+  .el-row .el-col {
+    width: 50% !important;
+  }
+  
+  .quick-btn {
+    font-size: 11px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 360px) {
+  .tool-hex-container {
+    padding: 8px;
+  }
+  
+  .page-title {
+    font-size: 1.4rem;
+  }
+  
+  .title-icon {
+    font-size: 1rem;
+  }
+  
+  .card-title {
+    font-size: 0.9em;
+  }
+  
+  .use-bgc {
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  
+  /* 超小屏幕表格进一步调整 */
+  .el-table {
+    font-size: 9px;
+  }
+  
+  .el-table th,
+  .el-table td {
+    padding: 4px 1px;
+    font-size: 9px;
+  }
+  
+  /* 超小屏幕快速按钮进一步调整 */
+  .el-row .el-col {
+    width: 50% !important;
   }
   
   .quick-btn {
     font-size: 10px;
-    height: 35px;
+    height: 28px;
+    margin-bottom: 4px;
   }
 }
 </style> 
