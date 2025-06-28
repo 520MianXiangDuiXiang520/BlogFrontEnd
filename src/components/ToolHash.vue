@@ -4,6 +4,7 @@ import { copyToClipboard } from '@/utils/clipboard'
 import { CopyDocument, ArrowRight, ArrowLeft, Key } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import CryptoJS from 'crypto-js'
+import whirlpool from 'whirlpool'
 
 // 哈希相关
 const inputText = ref('') // 输入文本
@@ -14,11 +15,11 @@ const isUpperCase = ref(true) // 是否大写
 // 支持的哈希算法
 const hashAlgorithms = [
   { label: 'MD5', value: 'MD5', description: '128位哈希，常用于文件完整性校验', type: 'crypto-js' },
-  { label: 'SHA-1', value: 'SHA-1', description: '160位哈希，已不推荐用于安全场景', type: 'web-crypto' },
-  { label: 'SHA-256', value: 'SHA-256', description: '256位哈希，比特币等加密货币使用', type: 'web-crypto' },
-  { label: 'SHA-384', value: 'SHA-384', description: '384位哈希，SHA-2系列', type: 'web-crypto' },
-  { label: 'SHA-512', value: 'SHA-512', description: '512位哈希，SHA-2系列，最高安全性', type: 'web-crypto' },
-  { label: 'SHA-224', value: 'SHA-224', description: '224位哈希，SHA-2系列', type: 'web-crypto' },
+  { label: 'SHA-1', value: 'SHA-1', description: '160位哈希，已不推荐用于安全场景', type: 'crypto-js' },
+  { label: 'SHA-256', value: 'SHA-256', description: '256位哈希，比特币等加密货币使用', type: 'crypto-js' },
+  { label: 'SHA-384', value: 'SHA-384', description: '384位哈希，SHA-2系列', type: 'crypto-js' },
+  { label: 'SHA-512', value: 'SHA-512', description: '512位哈希，SHA-2系列，最高安全性', type: 'crypto-js' },
+  { label: 'SHA-224', value: 'SHA-224', description: '224位哈希，SHA-2系列', type: 'crypto-js' },
   { label: 'RIPEMD-160', value: 'RIPEMD-160', description: '160位哈希，比特币地址生成使用', type: 'crypto-js' },
   { label: 'Whirlpool', value: 'Whirlpool', description: '512位哈希，ISO/IEC 10118-3标准', type: 'crypto-js' }
 ]
@@ -40,28 +41,34 @@ async function calculateHash() {
 
     let hashHex = ''
     
-    if (algorithm.type === 'web-crypto') {
-      // 使用Web Crypto API
-      const encoder = new TextEncoder()
-      const data = encoder.encode(input)
-      const hashBuffer = await crypto.subtle.digest(selectedAlgorithm.value, data)
-      const hashArray = Array.from(new Uint8Array(hashBuffer))
-      hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-    } else if (algorithm.type === 'crypto-js') {
-      // 使用crypto-js库
-      switch (selectedAlgorithm.value) {
-        case 'MD5':
-          hashHex = CryptoJS.MD5(input).toString()
-          break
-        case 'RIPEMD-160':
-          hashHex = CryptoJS.RIPEMD160(input).toString()
-          break
-        case 'Whirlpool':
-          hashHex = CryptoJS.Whirlpool(input).toString()
-          break
-        default:
-          throw new Error('不支持的算法')
-      }
+    // 统一使用crypto-js库，确保在所有环境下都能正常工作
+    switch (selectedAlgorithm.value) {
+      case 'MD5':
+        hashHex = CryptoJS.MD5(input).toString()
+        break
+      case 'SHA-1':
+        hashHex = CryptoJS.SHA1(input).toString()
+        break
+      case 'SHA-224':
+        hashHex = CryptoJS.SHA224(input).toString()
+        break
+      case 'SHA-256':
+        hashHex = CryptoJS.SHA256(input).toString()
+        break
+      case 'SHA-384':
+        hashHex = CryptoJS.SHA384(input).toString()
+        break
+      case 'SHA-512':
+        hashHex = CryptoJS.SHA512(input).toString()
+        break
+      case 'RIPEMD-160':
+        hashHex = CryptoJS.RIPEMD160(input).toString()
+        break
+      case 'Whirlpool':
+        hashHex = whirlpool(input)
+        break
+      default:
+        throw new Error('不支持的算法')
     }
     
     // 根据设置决定大小写
@@ -69,7 +76,7 @@ async function calculateHash() {
   } catch (error) {
     console.error('哈希计算错误:', error)
     outputHash.value = '计算失败'
-    ElMessage.error('哈希计算失败，请检查输入内容')
+    ElMessage.error(`哈希计算失败: ${error.message}`)
   }
 }
 
@@ -77,12 +84,18 @@ async function calculateHash() {
 function clearAll() {
   inputText.value = ''
   outputHash.value = ''
+  ElMessage.success('已清空输入和输出')
 }
 
 // 监听输入变化
 watch([inputText, selectedAlgorithm, isUpperCase], () => {
+  // 添加防抖，避免频繁计算
   if (inputText.value.trim()) {
-    calculateHash()
+    // 使用setTimeout进行防抖
+    clearTimeout(window.hashTimeout)
+    window.hashTimeout = setTimeout(() => {
+      calculateHash()
+    }, 300)
   } else {
     outputHash.value = ''
   }
@@ -105,8 +118,19 @@ async function copyHashResult() {
     await copyToClipboard(outputHash.value)
     ElMessage.success('哈希值已复制到剪贴板')
   } catch (error) {
+    console.error('复制失败:', error)
     ElMessage.error('复制失败，请手动复制')
   }
+}
+
+// 测试特定算法的函数
+function testAlgorithm(algorithmValue, testText = 'Hello World') {
+  inputText.value = testText
+  selectedAlgorithm.value = algorithmValue
+  // 手动触发计算
+  setTimeout(() => {
+    calculateHash()
+  }, 100)
 }
 </script>
 
@@ -200,7 +224,7 @@ async function copyHashResult() {
             <el-table-column prop="description" label="描述" />
             <el-table-column label="示例" width="200">
               <template #default="scope">
-                <el-button size="small" @click="inputText = 'Hello World'; selectedAlgorithm = scope.row.value; calculateHash()">
+                <el-button size="small" @click="testAlgorithm(scope.row.value)">
                   测试
                 </el-button>
               </template>
