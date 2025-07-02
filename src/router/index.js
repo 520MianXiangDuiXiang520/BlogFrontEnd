@@ -54,6 +54,11 @@ const router = createRouter({
       path: '/hash_tool',
       name: 'hash_tool',
       component: () => import('../components/ToolHash.vue')
+    },
+    {
+      path: '/string_tool',
+      name: 'string_tool',
+      component: () => import('../components/ToolString.vue')
     }
   ]
 })

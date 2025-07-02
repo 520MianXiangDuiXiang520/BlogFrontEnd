@@ -8,7 +8,8 @@ import {
   Lock, 
   Tools, 
   More,
-  ArrowRight
+  ArrowRight,
+  Sort
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -26,8 +27,9 @@ const encodeTools = [
 ];
 
 const otherTools = [
-  // { id: 1, toolName: "国家简称查询", logo: "", href: "" },
-  // { id: 2, toolName: "zsh 主题生成", logo: "", href: "" }
+  { id: 1, toolName: "字符串工具", logo: Sort, href: "/string_tool", desc: "字符串去重和排序功能" },
+  // { id: 2, toolName: "国家简称查询", logo: "", href: "" },
+  // { id: 3, toolName: "zsh 主题生成", logo: "", href: "" }
 ];
 
 const toolGroup = [
