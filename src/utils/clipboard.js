@@ -1,4 +1,4 @@
-import { successMsg, errorMsg } from "@/utils/index";
+import { successMsg, errorMsg } from "@/utils/msg";
 
 export function copyToClipboard(text) {
     if (navigator.clipboard) {

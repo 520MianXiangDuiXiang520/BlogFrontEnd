@@ -38,21 +38,16 @@ export default defineConfig({
     // 启用代码分割
     rollupOptions: {
       output: {
-        manualChunks: {
-          // 将Vue相关库分离
-          'vue-vendor': ['vue', 'vue-router'],
-          // 将Element Plus分离
-          'element-plus': ['element-plus'],
-          // 将markdown编辑器相关分离
-          'markdown-editor': [
-            '@kangc/v-md-editor',
-            'md-editor-v3',
-            'highlight.js'
-          ],
-          // 将数学公式相关分离
-          'math': ['katex'],
-          // 将工具库分离
-          'utils': ['axios', 'crypto-js', 'moment-timezone', 'vue3-cookies', 'whirlpool']
+        manualChunks(id) {
+          if (id.includes('node_modules/element-plus')) {
+            return 'element-plus';
+          }
+          if (id.includes('node_modules/md-editor-v3')) {
+            return 'markdown-editor';
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         }
       }
     },

@@ -21,26 +21,6 @@ const loadMarkdownEditor = async () => {
       }
     }
   });
-
-  const createKatexPlugin = (await import('@kangc/v-md-editor/lib/plugins/katex/npm')).default;
-  const VMdEditor = (await import('@kangc/v-md-editor')).default;
-  const VMdPreview = (await import('@kangc/v-md-editor/lib/preview')).default;
-  const baseEditorCSS = await import('@kangc/v-md-editor/lib/style/base-editor.css');
-  const githubTheme = (await import('@kangc/v-md-editor/lib/theme/github.js')).default;
-  const githubCSS = await import('@kangc/v-md-editor/lib/theme/style/github.css');
-  const previewCSS = await import('@kangc/v-md-editor/lib/style/preview.css');
-  const createLineNumbertPlugin = (await import('@kangc/v-md-editor/lib/plugins/line-number/index')).default;
-  const hljs = await import('highlight.js');
-
-  VMdPreview.use(githubTheme, {
-    Hljs: hljs.default,
-  }).use(createKatexPlugin()).use(createLineNumbertPlugin());
-
-  VMdEditor.use(githubTheme, {
-    Hljs: hljs.default,
-  }).use(createKatexPlugin()).use(createLineNumbertPlugin());
-
-  return { VMdEditor, VMdPreview };
 };
 
 // 懒加载Vue Cookies
@@ -64,8 +44,6 @@ Promise.all([
   loadVueCookies(),
   loadElementPlusIcons()
 ]).then(([markdownEditor, VueCookies, ElementPlusIconsVue]) => {
-  app.use(markdownEditor.VMdEditor)
-  app.use(markdownEditor.VMdPreview)
   app.use(VueCookies)
   
   // 注册Element Plus图标
