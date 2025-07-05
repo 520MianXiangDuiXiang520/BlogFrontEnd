@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch, onUnmounted } from 'vue';
+import { ref, computed, onMounted, nextTick, watch, onUnmounted, shallowRef } from 'vue';
 import instance from "@/utils/request";
-import { MdPreview, MdCatalog } from 'md-editor-v3';
-import 'md-editor-v3/lib/preview.css';
+// 移除静态导入，改为动态导入
+// import { MdPreview, MdCatalog } from 'md-editor-v3';
+// import 'md-editor-v3/lib/preview.css';
 import { useDark } from '@vueuse/core';
 import { useRoute } from 'vue-router'
 
@@ -19,6 +20,24 @@ const isInitialized = ref(false); // 是否已初始化
 const catalogRef = ref(null); // 目录容器引用
 const currentHeading = ref(''); // 当前高亮的标题
 const catalogHeight = ref('calc(100vh - 120px)'); // 目录高度
+
+// 动态导入 md-editor-v3 组件
+const MdPreview = shallowRef(null);
+const MdCatalog = shallowRef(null);
+const isEditorLoaded = ref(false);
+
+// 加载编辑器
+const loadEditor = async () => {
+    try {
+        const { MdPreview: Preview, MdCatalog: Catalog } = await import('md-editor-v3');
+        await import('md-editor-v3/lib/preview.css');
+        MdPreview.value = Preview;
+        MdCatalog.value = Catalog;
+        isEditorLoaded.value = true;
+    } catch (error) {
+        console.error('Failed to load md-editor-v3:', error);
+    }
+};
 
 // 获取目录数据
 const getCatalogData = () => {
@@ -139,7 +158,9 @@ function articleDetailReq() {
         });
 }
 
-onMounted(() => {
+onMounted(async () => {
+    // 先加载编辑器，再加载文章数据
+    await loadEditor();
     articleDetailReq();
 })
 
@@ -151,14 +172,14 @@ onUnmounted(() => {
 
 <template>
     <!-- 数据未加载完成时显示加载提示 -->
-    <div v-if="!isLoaded" class="loading-container">
+    <div v-if="!isLoaded || !isEditorLoaded" class="loading-container">
         <div class="loading">Loading...</div>
     </div>
     <!-- 数据加载完成后显示内容 -->
     <div v-else class="detail-container">
         <!-- 文章内容区域 -->
         <div class="article-content" :class="{ 'catalog-expanded': isCatalogVisible && isInitialized }">
-            <MdPreview :editorId="id" :modelValue="text" :theme="theme" />
+            <component :is="MdPreview" :editorId="id" :modelValue="text" :theme="theme" />
         </div>
         
         <!-- 目录区域 -->

@@ -3,7 +3,6 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { formatDate, date2STimestamp, date2MsTimestamp, timestamp2time } from '@/utils/date'
 import { copyToClipboard } from '@/utils/clipboard'
 import { VideoPause, VideoPlay, CopyDocument, Clock, Timer, Calendar, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
-import moment from 'moment-timezone';
 // import Map from './map.vue'
 
 const nowTime = ref(new Date);
@@ -73,10 +72,14 @@ function toTime(){
         return;
     }
     
-    if (inputSOrMs.value == '1') {
-        outputTime.value = timestamp2time(inputTimeTamp.value*1000, selectTimeZone.value)
-    } else {
-        outputTime.value = timestamp2time(inputTimeTamp.value, selectTimeZone.value)
+    try {
+        if (inputSOrMs.value == '1') {
+            outputTime.value = timestamp2time(inputTimeTamp.value*1000, selectTimeZone.value)
+        } else {
+            outputTime.value = timestamp2time(inputTimeTamp.value, selectTimeZone.value)
+        }
+    } catch (error) {
+        outputTime.value = '转换失败';
     }
 }
 
@@ -97,40 +100,41 @@ function toTimestamp(){
     }
     
     try {
-        let momentObj;
+        // 使用原生 JavaScript 解析时间
+        let date;
+        const input = inputDateTime.value.trim();
+        
         // 尝试解析多种时间格式
         const formats = [
-            'YYYY/MM/DD HH:mm:ss',
-            'YYYY-MM-DD HH:mm:ss',
-            'YYYY/MM/DD HH:mm',
-            'YYYY-MM-DD HH:mm',
-            'YYYY/MM/DD',
-            'YYYY-MM-DD'
+            /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/, // YYYY/MM/DD HH:mm:ss
+            /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/, // YYYY-MM-DD HH:mm:ss
+            /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/, // YYYY/MM/DD HH:mm
+            /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, // YYYY-MM-DD HH:mm
+            /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
+            /^\d{4}-\d{2}-\d{2}$/ // YYYY-MM-DD
         ];
         
         let parsed = false;
         for (const format of formats) {
-            if (moment(inputDateTime.value, format, true).isValid()) {
-                momentObj = moment(inputDateTime.value, format);
-                parsed = true;
-                break;
+            if (format.test(input)) {
+                date = new Date(input);
+                if (!isNaN(date.getTime())) {
+                    parsed = true;
+                    break;
+                }
             }
         }
         
         if (!parsed) {
             // 如果标准格式都解析失败，尝试自动解析
-            momentObj = moment(inputDateTime.value);
+            date = new Date(input);
         }
         
-        if (momentObj.isValid()) {
-            if (selectTimeZone.value) {
-                momentObj.tz(selectTimeZone.value);
-            }
-            
+        if (!isNaN(date.getTime())) {
             if (outputSOrMs.value == '1') {
-                outputTimestamp.value = momentObj.unix().toString();
+                outputTimestamp.value = Math.floor(date.getTime() / 1000).toString();
             } else {
-                outputTimestamp.value = momentObj.valueOf().toString();
+                outputTimestamp.value = date.getTime().toString();
             }
         } else {
             outputTimestamp.value = '时间格式错误';
@@ -160,7 +164,10 @@ watch(outputSOrMs, () => {
 onMounted(() => {
     startInterval();
     allTimeZone.value = Intl.supportedValuesOf('timeZone');
-    allCountry.value = moment.tz.countries();
+    
+    // 移除 moment 依赖，简化国家列表
+    allCountry.value = [];
+    
     selectByTimeZone();
 })
 

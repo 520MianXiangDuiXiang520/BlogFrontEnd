@@ -1,7 +1,5 @@
 <script setup>
-import { ref, computed, reactive, onMounted, unref } from 'vue';
-import { MdEditor } from 'md-editor-v3';
-import 'md-editor-v3/lib/style.css';
+import { ref, computed, reactive, onMounted, unref, shallowRef } from 'vue';
 import { useDark } from '@vueuse/core';
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from "element-plus";
@@ -28,6 +26,22 @@ const form = reactive({
     abstract: '',
     text: ''
 })
+
+// 动态导入 md-editor-v3 组件
+const MdEditor = shallowRef(null);
+const isEditorLoaded = ref(false);
+
+// 加载编辑器
+const loadEditor = async () => {
+    try {
+        const { MdEditor: Editor } = await import('md-editor-v3');
+        await import('md-editor-v3/lib/style.css');
+        MdEditor.value = Editor;
+        isEditorLoaded.value = true;
+    } catch (error) {
+        console.error('Failed to load md-editor-v3:', error);
+    }
+};
 
 const onClickOutside = () => {
     unref(popoverRef).popperRef?.delayHide?.();
@@ -139,15 +153,22 @@ function tagCannotBeSetlect(tag) {
     return selectTags.value.indexOf(tag) >= 0;
 }
 
-onMounted(() => {
+onMounted(async () => {
     if (!checkAuth()) { return }
+    // 先加载编辑器，再加载文章数据
+    await loadEditor();
     articleDetailReq();
 })
 
 </script>
 
 <template>
-    <MdEditor v-model="text" :theme="theme" @onSave="save" />
+    <!-- 编辑器加载中显示加载提示 -->
+    <div v-if="!isEditorLoaded" class="loading-container">
+        <div class="loading">Loading Editor...</div>
+    </div>
+    <!-- 编辑器加载完成后显示 -->
+    <component v-else :is="MdEditor" v-model="text" :theme="theme" @onSave="save" />
 
     <!-- 提交表单 -->
     <el-drawer v-model="drawer" :title="drawerTitle" direction="rtl">

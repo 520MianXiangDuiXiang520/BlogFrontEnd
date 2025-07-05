@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import moment from 'moment-timezone';
+// 移除 moment 依赖，使用原生 JavaScript
 import timezoneData from '@/assets/timezone-meta.json';
 import spanOffset from '@/assets/map-span.json'
 
@@ -29,9 +29,34 @@ class Center {
         this.y = (90 - data.lat) / 180;
         this.dom = null;
         this.activate = function () {
-            const m = moment().tz(this.name);
+            // 使用原生 JavaScript 处理时区
+            const now = new Date();
             labelName.value = this.name;
-            labelTime.value = m.format("hh:mm a ") + m.zoneAbbr();
+            
+            try {
+                // 使用 Intl.DateTimeFormat 格式化时间
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                    timeZone: this.name
+                });
+                
+                const timeStr = formatter.format(now);
+                
+                // 获取时区缩写
+                const timeZoneFormatter = new Intl.DateTimeFormat('en-US', {
+                    timeZoneName: 'short',
+                    timeZone: this.name
+                });
+                const timeZoneStr = timeZoneFormatter.formatToParts(now)
+                    .find(part => part.type === 'timeZoneName')?.value || '';
+                
+                labelTime.value = timeStr + ' ' + timeZoneStr;
+            } catch (error) {
+                labelTime.value = '时间获取失败';
+            }
+            
             axisXStyle.value = { left: `${this.x * 100}%` };
             axisYStyle.value = { top: `${this.y * 100}%` };
         };
@@ -50,11 +75,15 @@ function loadTimeZoneData() {
     for (const name in timezoneData.zones) {
         centers.value.push(new Center(timezoneData.zones[name]));
     }
-    // 自动激活猜测的时区
-    const guess = moment.tz.guess();
-    const guessedCenter = centers.value.find(c => c.name === guess);
-    if (guessedCenter) {
-        changeCenter(guessedCenter);
+    // 自动激活本地时区
+    try {
+        const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const localCenter = centers.value.find(c => c.name === localTimeZone);
+        if (localCenter) {
+            changeCenter(localCenter);
+        }
+    } catch (error) {
+        console.error('Failed to get local timezone:', error);
     }
 }
 
