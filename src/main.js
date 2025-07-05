@@ -6,6 +6,19 @@ import router from './router'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'element-plus/es/components/message/style/css';
 
+// 配置 md-editor-v3 使用 npm 包中的 KaTeX
+import { config } from 'md-editor-v3';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+config({
+  editorExtensions: {
+    katex: {
+      instance: katex
+    }
+  }
+});
+
 import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/npm';
 import VMdEditor from '@kangc/v-md-editor';
 import VMdPreview from '@kangc/v-md-editor/lib/preview';
