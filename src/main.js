@@ -6,7 +6,7 @@ import router from './router'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import 'element-plus/es/components/message/style/css';
 
-import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/cdn';
+import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/npm';
 import VMdEditor from '@kangc/v-md-editor';
 import VMdPreview from '@kangc/v-md-editor/lib/preview';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
