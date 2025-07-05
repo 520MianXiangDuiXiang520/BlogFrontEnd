@@ -4,8 +4,6 @@ import { RouterLink, RouterView } from 'vue-router'
 import Menu from './components/Menu.vue'
 import Footar from './components/Footer.vue'
 
-
-
 </script>
 
 <template>
