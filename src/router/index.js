@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AboutView from '../views/AboutView.vue'
+import EasterEggView from '../views/EasterEggView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +60,11 @@ const router = createRouter({
       path: '/string_tool',
       name: 'string_tool',
       component: () => import('../components/ToolString.vue')
+    },
+    {
+      path: '/easter-egg',
+      name: 'easter-egg',
+      component: EasterEggView
     }
   ]
 })
