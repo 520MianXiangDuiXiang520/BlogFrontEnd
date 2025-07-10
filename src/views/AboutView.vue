@@ -17,6 +17,11 @@ const isEditorLoaded = ref(false);
 // 加载编辑器
 const loadEditor = async () => {
     try {
+        // 先配置 KaTeX
+        const { configureKatex } = await import('@/utils/katex');
+        await configureKatex();
+        
+        // 再加载 markdown 编辑器
         const { MdPreview: Preview } = await import('md-editor-v3');
         await import('md-editor-v3/lib/preview.css');
         MdPreview.value = Preview;

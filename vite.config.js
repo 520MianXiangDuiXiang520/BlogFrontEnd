@@ -300,6 +300,11 @@ export default defineConfig({
             return 'vue-compiler';
           }
           
+          // Element Plus 图标 - 动态导入，不进行静态分包
+          if (id.includes('node_modules/@element-plus/icons-vue')) {
+            return 'element-icons';
+          }
+          
           // md-editor-v3 相关依赖 - 不进行静态分包，使用动态导入
           if (id.includes('node_modules/md-editor-v3') ||
               id.includes('node_modules/@md-editor-v3') ||

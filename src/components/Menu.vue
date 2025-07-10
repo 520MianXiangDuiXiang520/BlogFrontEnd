@@ -1,11 +1,23 @@
 <script setup>
 import { useDark } from '@vueuse/core'
-import { Sunny, Moon } from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '@/utils/storage'
+import { loadIcons } from '@/utils/icons'
 
 const router = useRouter()
 const isDark = useDark()
+
+// 图标组件
+const Sunny = ref(null)
+const Moon = ref(null)
+
+// 加载图标
+onMounted(async () => {
+  const icons = await loadIcons(['Sunny', 'Moon'])
+  Sunny.value = icons.Sunny
+  Moon.value = icons.Moon
+})
 
 function goHome() {
     router.push('/');
@@ -39,7 +51,7 @@ function goHome() {
         <!-- <el-menu-item index="4"> -->
 
         <div class="el-menu-item">
-            <el-switch v-model="isDark" :active-icon="Moon" :inactive-icon="Sunny">
+            <el-switch v-model="isDark" :active-icon="Moon" :inactive-icon="Sunny" v-if="Moon && Sunny">
             </el-switch>
 
             <!-- <button @click="toggleDark()">
