@@ -179,143 +179,201 @@ onBeforeUnmount(() => {
 
 
 <template>
-    <div>
-        <h1 class="page-title">
-            <el-icon class="title-icon"><Clock /></el-icon>
-            时间日期转换工具
-        </h1>
+    <div class="tool-date-container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <el-icon class="title-icon"><Clock /></el-icon>
+                时间日期转换工具
+            </h1>
+            <p class="page-subtitle">快速转换时间戳与日期时间格式</p>
+        </div>
 
-        <el-card class="use-bgc space-12">
-            <h3 class="card-title">
-                <el-icon class="title-icon"><Timer /></el-icon>
-                当前时间
-            </h3>
-            <el-row class="space-8" :gutter="16">
-                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(formatDate(nowTime))">
-                    <el-tooltip content="点击复制" placement="bottom">
-                        <p class="clickable">
-                            <span class="now-number">{{ formatDate(nowTime) }}</span>
-                        </p>
-                    </el-tooltip>
-                </el-col>
-                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(date2MsTimestamp(nowTime))">
-                    <el-tooltip content="点击复制" placement="bottom">
-                        <p class="clickable">
-                            <span class="now-number">{{ date2MsTimestamp(nowTime) }}</span><span>毫秒 </span>
-                        </p>
-                    </el-tooltip>
-                </el-col>
-                <el-col :xs="24" :sm="8" :md="8" :lg="8" @click="copyToClipboard(date2STimestamp(nowTime))">
-                    <el-tooltip content="点击复制" placement="bottom">
-                        <p class="clickable">
-                            <span class="now-number">{{ date2STimestamp(nowTime) }}</span><span>秒</span>
-                        </p>
-                    </el-tooltip>
-                </el-col>
-            </el-row>
-
-            <div class="button-group">
-                <el-button :icon="VideoPlay" type="success" v-if="timerStoped" @click="restartInterval()"> 开始 </el-button>
-                <el-button :icon="VideoPause" type="danger" v-else @click="pauseInterval()"> 停止 </el-button>
+        <!-- 当前时间显示 -->
+        <div class="current-time-section">
+            <div class="time-display">
+                <div class="time-item" @click="copyToClipboard(formatDate(nowTime))">
+                    <div class="time-label">当前时间</div>
+                    <div class="time-value">{{ formatDate(nowTime) }}</div>
+                </div>
+                <div class="time-item" @click="copyToClipboard(date2MsTimestamp(nowTime))">
+                    <div class="time-label">毫秒时间戳</div>
+                    <div class="time-value">{{ date2MsTimestamp(nowTime) }}</div>
+                </div>
+                <div class="time-item" @click="copyToClipboard(date2STimestamp(nowTime))">
+                    <div class="time-label">秒时间戳</div>
+                    <div class="time-value">{{ date2STimestamp(nowTime) }}</div>
+                </div>
             </div>
-        </el-card>
+            
+            <div class="time-controls">
+                <el-button 
+                    :icon="timerStoped ? VideoPlay : VideoPause" 
+                    :type="timerStoped ? 'success' : 'danger'"
+                    size="large"
+                    @click="timerStoped ? restartInterval() : pauseInterval()"
+                    class="control-btn"
+                >
+                    {{ timerStoped ? '开始' : '停止' }}
+                </el-button>
+            </div>
+        </div>
 
+        <!-- 转换工具区域 -->
+        <div class="conversion-tools">
+            <!-- 时间戳转时间 -->
+            <div class="tool-section">
+                <div class="tool-header">
+                    <el-icon class="tool-icon"><ArrowRight /></el-icon>
+                    <h2 class="tool-title">时间戳转时间</h2>
+                </div>
+                
+                <div class="tool-content">
+                    <div class="input-group">
+                        <el-input 
+                            v-model="inputTimeTamp" 
+                            size="large" 
+                            placeholder="请输入时间戳"
+                            class="main-input"
+                            @input="onTampInput"
+                        >
+                            <template #append>
+                                <el-select v-model="inputSOrMs" placeholder="单位" style="width: 100px" size="large">
+                                    <el-option label="秒" value="1" />
+                                    <el-option label="毫秒" value="2" />
+                                </el-select>
+                            </template>
+                        </el-input>
+                        
+                        <el-select 
+                            v-model="selectTimeZone" 
+                            filterable 
+                            placeholder="选择时区" 
+                            size="large"
+                            class="timezone-select"
+                        >
+                            <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
+                        </el-select>
+                        
+                        <el-button 
+                            type="primary" 
+                            size="large" 
+                            @click="toTime"
+                            class="convert-btn"
+                        >
+                            转换
+                        </el-button>
+                    </div>
+                    
+                    <div class="output-group">
+                        <el-input 
+                            v-model="outputTime" 
+                            size="large" 
+                            disabled 
+                            placeholder="转换结果"
+                            class="result-input"
+                            @click="copyToClipboard(outputTime)"
+                        >
+                            <template #suffix>
+                                <el-button 
+                                    :icon="CopyDocument" 
+                                    @click="copyToClipboard(outputTime)"
+                                    :disabled="!outputTime"
+                                    class="copy-btn"
+                                />
+                            </template>
+                        </el-input>
+                    </div>
+                </div>
+            </div>
 
-<!-- 
-        
-功能：
- 1. 自动识别是时间戳转时间还是时间转时间戳
- 2. 时区按照国家搜索 
- 3. 中文时区
- 4. 支持多种时间格式
- 5. 支持时区多选
- 6. 支持历史记录
--->
-
-        <el-card class="use-bgc space-12">
-            <h3 class="card-title">
-                <el-icon class="title-icon arrow-right"><ArrowRight /></el-icon>
-                时间戳转时间
-            </h3>
-
-            <el-row class="space-12 tool-row" :gutter="16">
-                <el-col :xs="24" :sm="24" :md="10" :lg="9">
-                    <el-input v-model="inputTimeTamp" size="large" placeholder="请输入时间戳"
-                        class="input-with-select" @input="onTampInput">
-                        <template #append>
-                            <el-select v-model="inputSOrMs" placeholder="毫秒(ms)" style="width: 115px" size="large">
-                                <el-option label="秒(s)" value="1" />
-                                <el-option label="毫秒(ms)" value="2" />
-                            </el-select>
-                        </template>
-                    </el-input>
-                </el-col>
-               
-                <el-col :xs="24" :sm="12" :md="6" :lg="4">
-                    <el-select v-model="selectTimeZone" filterable placeholder="Asia/Shanghai" size="large">
-                        <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
-                    </el-select>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="4" :lg="2">
-                    <el-button type="default" size="large" class="transition-btn" @click="toTime">转换</el-button>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="10" :lg="9">
-                    <el-input v-model="outputTime" size="large" disabled placeholder="转换结果" 
-                        class="clickable-output" @click="copyToClipboard(outputTime)">
-                        <template #append>
-                            <el-button :icon="CopyDocument" @click="copyToClipboard(outputTime)"/>
-                        </template>
-                    </el-input>
-                </el-col>
-            </el-row>
-        </el-card>
-
-        <el-card class="use-bgc space-12">
-            <h3 class="card-title">
-                <el-icon class="title-icon arrow-left"><ArrowLeft /></el-icon>
-                时间转时间戳
-            </h3>
-
-            <el-row class="space-12 tool-row" :gutter="16">
-                <el-col :xs="24" :sm="24" :md="10" :lg="9">
-                    <el-input v-model="inputDateTime" size="large" placeholder="请输入时间 (如: 2024/11/12 16:38:19)"
-                        @input="onDateTimeInput">
-                    </el-input>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="6" :lg="4">
-                    <el-select v-model="selectTimeZone" filterable placeholder="Asia/Shanghai" size="large">
-                        <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
-                    </el-select>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="4" :lg="2">
-                    <el-button type="default" size="large" class="transition-btn" @click="toTimestamp">转换</el-button>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="10" :lg="9">
-                    <el-input v-model="outputTimestamp" size="large" disabled placeholder="转换结果"
-                        class="input-with-select clickable-output" @click="copyToClipboard(outputTimestamp)">
-                        <template #append>
-                            <el-select v-model="outputSOrMs" placeholder="秒(s)" style="width: 115px" size="large">
-                                <el-option label="秒(s)" value="1" />
-                                <el-option label="毫秒(ms)" value="2" />
-                            </el-select>
-                        </template>
-                        <template #suffix>
-                            <el-button :icon="CopyDocument" @click="copyToClipboard(outputTimestamp)" :disabled="!outputTimestamp"/>
-                        </template>
-                    </el-input>
-                </el-col>
-            </el-row>
-        </el-card>
+            <!-- 时间转时间戳 -->
+            <div class="tool-section">
+                <div class="tool-header">
+                    <el-icon class="tool-icon"><ArrowLeft /></el-icon>
+                    <h2 class="tool-title">时间转时间戳</h2>
+                </div>
+                
+                <div class="tool-content">
+                    <div class="input-group">
+                        <el-input 
+                            v-model="inputDateTime" 
+                            size="large" 
+                            placeholder="请输入时间 (如: 2024/11/12 16:38:19)"
+                            class="main-input"
+                            @input="onDateTimeInput"
+                        />
+                        
+                        <el-select 
+                            v-model="selectTimeZone" 
+                            filterable 
+                            placeholder="选择时区" 
+                            size="large"
+                            class="timezone-select"
+                        >
+                            <el-option v-for="item in selectOption" :key="item" :label="item" :value="item" />
+                        </el-select>
+                        
+                        <el-button 
+                            type="primary" 
+                            size="large" 
+                            @click="toTimestamp"
+                            class="convert-btn"
+                        >
+                            转换
+                        </el-button>
+                    </div>
+                    
+                    <div class="output-group">
+                        <el-input 
+                            v-model="outputTimestamp" 
+                            size="large" 
+                            disabled 
+                            placeholder="转换结果"
+                            class="result-input"
+                            @click="copyToClipboard(outputTimestamp)"
+                        >
+                            <template #append>
+                                <el-select v-model="outputSOrMs" placeholder="单位" style="width: 100px" size="large">
+                                    <el-option label="秒" value="1" />
+                                    <el-option label="毫秒" value="2" />
+                                </el-select>
+                            </template>
+                            <template #suffix>
+                                <el-button 
+                                    :icon="CopyDocument" 
+                                    @click="copyToClipboard(outputTimestamp)"
+                                    :disabled="!outputTimestamp"
+                                    class="copy-btn"
+                                />
+                            </template>
+                        </el-input>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.page-title {
+.tool-date-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 页面头部 */
+.page-header {
     text-align: center;
-    margin-bottom: 24px;
-    color: var(--titleColor);
+    margin-bottom: 48px;
+    padding: 40px 0;
+}
+
+.page-title {
     font-size: 2.5rem;
     font-weight: 700;
+    color: var(--titleColor);
+    margin: 0 0 16px 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -327,261 +385,312 @@ onBeforeUnmount(() => {
     color: var(--titleColor);
 }
 
-.now-number {
-    font: 2em sans-serif;
-    margin-right: 7px;
+.page-subtitle {
+    font-size: 1.1rem;
     color: var(--bTextColor);
+    opacity: 0.8;
+    margin: 0;
 }
 
-.clickable {
+/* 当前时间区域 */
+.current-time-section {
+    background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-color-primary-light-8) 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 48px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--el-border-color-lighter);
+}
+
+.time-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.time-item {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
 }
 
-.clickable:hover {
-    opacity: 0.7;
+.time-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.95);
 }
 
-.button-group {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    height: 100%;
-}
-
-.button-group .el-button {
-    flex: 1;
-}
-
-.transition-btn {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.tool-row {
-    margin-bottom: 10px;
-}
-
-.space-8 {
+.time-label {
+    font-size: 0.9rem;
+    color: var(--el-text-color-secondary);
     margin-bottom: 8px;
+    font-weight: 500;
 }
 
-.space-12 {
-    margin-bottom: 12px;
-}
-
-.mt-4 {
-    margin-top: 4px;
-}
-
-.card-title {
-    margin-bottom: 16px;
-    color: var(--bTextColor);
-    font-size: 1.3em;
+.time-value {
+    font-size: 1.4rem;
     font-weight: 600;
+    color: var(--el-text-color-primary);
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.time-controls {
+    display: flex;
+    justify-content: center;
+}
+
+.control-btn {
+    min-width: 120px;
+    height: 48px;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+/* 转换工具区域 */
+.conversion-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.tool-section {
+    background: var(--el-bg-color);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--el-border-color-lighter);
+}
+
+.tool-header {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-bottom: 24px;
 }
 
-.card-title .title-icon {
+.tool-icon {
     font-size: 1.1em;
     color: var(--titleColor);
 }
 
-.card-title .title-icon.arrow-right {
-    color: var(--titleColor);
+.tool-title {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--bTextColor);
+    margin: 0;
 }
 
-.card-title .title-icon.arrow-left {
-    color: var(--titleColor);
+.tool-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
-.use-bgc {
-    background-color: var(--bPageBgColor);
-    margin-bottom: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.input-group {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: start;
 }
 
-/* 让复制按钮与输入框高度一致 */
-.el-input .el-button {
-    height: 100%;
+.main-input {
+    min-width: 0;
+}
+
+.timezone-select {
+    min-width: 200px;
+}
+
+.convert-btn {
+    min-width: 100px;
+    height: 44px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.output-group {
+    display: flex;
+    gap: 16px;
+}
+
+.result-input {
+    flex: 1;
+}
+
+.copy-btn {
     border: none;
+    background: transparent;
+    color: var(--el-text-color-regular);
+    transition: color 0.2s ease;
+}
+
+.copy-btn:hover {
+    color: var(--el-color-primary);
     background: transparent;
 }
 
-.el-input .el-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* 可点击的输出框样式 */
-.clickable-output {
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.clickable-output:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.clickable-output:active {
-    background-color: rgba(255, 255, 255, 0.1);
+.copy-btn:disabled {
+    color: var(--el-text-color-placeholder);
 }
 
 /* 深色模式适配 */
-html.dark .use-bgc {
-    background-color: var(--bPageBgColor);
+html.dark .current-time-section {
+    background: linear-gradient(135deg, rgba(64, 158, 255, 0.1) 0%, rgba(64, 158, 255, 0.05) 100%);
+    border-color: var(--el-border-color);
+}
+
+html.dark .time-item {
+    background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-html.dark .el-input .el-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+html.dark .time-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
-html.dark .clickable-output:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-html.dark .clickable-output:active {
-    background-color: rgba(255, 255, 255, 0.1);
+html.dark .tool-section {
+    background: var(--el-bg-color-overlay);
+    border-color: var(--el-border-color);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+    .tool-date-container {
+        padding: 0 16px;
+    }
+    
+    .page-header {
+        margin-bottom: 32px;
+        padding: 24px 0;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+        gap: 8px;
+    }
+    
+    .title-icon {
+        font-size: 1.6rem;
+    }
+    
+    .page-subtitle {
+        font-size: 1rem;
+    }
+    
+    .current-time-section {
+        padding: 24px;
+        margin-bottom: 32px;
+        border-radius: 16px;
+    }
+    
+    .time-display {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .time-item {
+        padding: 20px;
+    }
+    
+    .time-value {
+        font-size: 1.2rem;
+    }
+    
+    .tool-section {
+        padding: 24px;
+        border-radius: 16px;
+    }
+    
+    .tool-header {
+        margin-bottom: 20px;
+    }
+    
+    .input-group {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .timezone-select {
+        min-width: auto;
+    }
+    
+    .convert-btn {
+        width: 100%;
+        height: 48px;
+    }
+    
+    .output-group {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tool-date-container {
+        padding: 0 12px;
+    }
+    
+    .page-header {
+        margin-bottom: 24px;
+        padding: 20px 0;
+    }
+    
     .page-title {
         font-size: 1.8rem;
-        margin-bottom: 20px;
-        gap: 8px;
+        flex-direction: column;
+        gap: 6px;
     }
     
     .title-icon {
         font-size: 1.4rem;
     }
     
-    .card-title {
-        font-size: 1.1em;
-        margin-bottom: 12px;
+    .page-subtitle {
+        font-size: 0.9rem;
     }
     
-    .now-number {
-        font-size: 1.5em;
+    .current-time-section {
+        padding: 20px;
+        margin-bottom: 24px;
+        border-radius: 12px;
     }
     
-    .use-bgc {
-        margin-bottom: 12px;
+    .time-item {
         padding: 16px;
     }
     
-    .tool-row {
-        margin-bottom: 8px;
+    .time-value {
+        font-size: 1.1rem;
     }
     
-    .space-12 {
-        margin-bottom: 8px;
+    .tool-section {
+        padding: 20px;
+        border-radius: 12px;
     }
     
-    .space-8 {
-        margin-bottom: 6px;
-    }
-    
-    /* 移动端布局调整 */
-    .el-col {
-        margin-bottom: 12px;
-    }
-    
-    /* 输入框在移动端占满宽度 */
-    .el-input,
-    .el-select {
-        width: 100%;
-    }
-    
-    /* 按钮在移动端调整 */
-    .transition-btn {
-        width: 100%;
-        height: 44px;
-    }
-    
-    /* 当前时间显示在移动端垂直排列 */
-    .el-row .el-col {
-        text-align: center;
-    }
-    
-    .clickable {
-        padding: 8px;
-        border-radius: 6px;
-    }
-    
-    /* 按钮组在移动端调整 */
-    .button-group {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .button-group .el-button {
-        width: 100%;
-        height: 44px;
-    }
-}
-
-@media (max-width: 480px) {
-    .page-title {
-        font-size: 1.6rem;
-        flex-direction: column;
-        gap: 6px;
-    }
-    
-    .title-icon {
-        font-size: 1.2rem;
-    }
-    
-    .card-title {
-        font-size: 1em;
+    .tool-header {
+        margin-bottom: 20px;
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
     }
     
-    .now-number {
-        font-size: 1.3em;
+    .tool-title {
+        font-size: 1.2rem;
     }
     
-    .use-bgc {
-        padding: 12px;
-        margin-bottom: 8px;
+    .input-group {
+        gap: 10px;
     }
     
-    /* 超小屏幕下的特殊处理 */
-    .el-col {
-        width: 100% !important;
-        margin-bottom: 8px;
-    }
-    
-    .tool-row {
-        margin-bottom: 6px;
-    }
-    
-    .space-12 {
-        margin-bottom: 6px;
-    }
-    
-    /* 按钮组在超小屏幕下的调整 */
-    .button-group {
-        flex-direction: column;
-        gap: 6px;
-    }
-    
-    .button-group .el-button {
-        width: 100%;
-        height: 40px;
-    }
-    
-    /* 当前时间在超小屏幕下的调整 */
-    .clickable {
-        padding: 6px;
-        border-radius: 4px;
+    .convert-btn {
+        height: 44px;
     }
 }
 </style>
