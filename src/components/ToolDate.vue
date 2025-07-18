@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { formatDate, date2STimestamp, date2MsTimestamp, timestamp2time } from '@/utils/date'
 import { copyToClipboard } from '@/utils/clipboard'
-import { VideoPause, VideoPlay, CopyDocument, Clock, Timer, Calendar, ArrowRight, ArrowLeft } from '@element-plus/icons-vue'
+import { VideoPause, VideoPlay, CopyDocument, Clock, Timer, Calendar, ArrowRight, ArrowLeft, Delete, Document } from '@element-plus/icons-vue'
 // import Map from './map.vue'
 
 const nowTime = ref(new Date);
@@ -25,7 +25,114 @@ const inputDateTime = ref(''); // 输入的时间
 const outputTimestamp = ref(''); // 输出的时间戳
 const outputSOrMs = ref('1'); // 输出的秒还是毫秒
 
+// 历史记录相关
+const historyRecords = ref([]);
+const maxHistoryCount = 50; // 最大历史记录数量
+
+// 防抖相关
+let debounceTimer = null;
+const debounceDelay = 500; // 500ms 防抖延迟
+
 let timer = 0
+
+// 历史记录管理
+function addToHistory(type, input, output, timezone) {
+    const record = {
+        id: Date.now(),
+        type: type, // 'timestamp2time' 或 'time2timestamp'
+        input: input,
+        output: output,
+        timezone: timezone,
+        timestamp: new Date().toISOString()
+    };
+    
+    // 检查是否已存在相同的记录
+    const existingIndex = historyRecords.value.findIndex(item => 
+        item.type === record.type && 
+        item.input === record.input && 
+        item.timezone === record.timezone
+    );
+    
+    if (existingIndex !== -1) {
+        // 如果存在相同记录，更新输出和时间戳
+        historyRecords.value[existingIndex].output = record.output;
+        historyRecords.value[existingIndex].timestamp = record.timestamp;
+        // 将更新的记录移到顶部
+        const updatedRecord = historyRecords.value.splice(existingIndex, 1)[0];
+        historyRecords.value.unshift(updatedRecord);
+    } else {
+        // 添加新记录到顶部
+        historyRecords.value.unshift(record);
+        
+        // 限制历史记录数量
+        if (historyRecords.value.length > maxHistoryCount) {
+            historyRecords.value = historyRecords.value.slice(0, maxHistoryCount);
+        }
+    }
+    
+    // 保存到本地存储
+    saveHistoryToStorage();
+}
+
+function removeHistoryRecord(id) {
+    const index = historyRecords.value.findIndex(record => record.id === id);
+    if (index !== -1) {
+        historyRecords.value.splice(index, 1);
+        saveHistoryToStorage();
+    }
+}
+
+function clearAllHistory() {
+    historyRecords.value = [];
+    saveHistoryToStorage();
+}
+
+function loadHistoryFromStorage() {
+    try {
+        const stored = localStorage.getItem('toolDateHistory');
+        if (stored) {
+            historyRecords.value = JSON.parse(stored);
+        }
+    } catch (error) {
+        console.error('Failed to load history from storage:', error);
+    }
+}
+
+function saveHistoryToStorage() {
+    try {
+        localStorage.setItem('toolDateHistory', JSON.stringify(historyRecords.value));
+    } catch (error) {
+        console.error('Failed to save history to storage:', error);
+    }
+}
+
+function useHistoryRecord(record) {
+    if (record.type === 'timestamp2time') {
+        inputTimeTamp.value = record.input;
+        selectTimeZone.value = record.timezone;
+        onTampInput();
+    } else if (record.type === 'time2timestamp') {
+        inputDateTime.value = record.input;
+        selectTimeZone.value = record.timezone;
+        onDateTimeInput();
+    }
+}
+
+function formatHistoryTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) { // 1分钟内
+        return '刚刚';
+    } else if (diff < 3600000) { // 1小时内
+        return `${Math.floor(diff / 60000)}分钟前`;
+    } else if (diff < 86400000) { // 1天内
+        return `${Math.floor(diff / 3600000)}小时前`;
+    } else {
+        return date.toLocaleDateString();
+    }
+}
 
 function selectByTimeZone() {
     selectNoMapSwitch.value = true;
@@ -63,7 +170,16 @@ function onTampInput() {
             inputSOrMs.value = '1';  // s
         }
     }
-    toTime();
+    
+    // 清除之前的防抖定时器
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+    
+    // 设置新的防抖定时器
+    debounceTimer = setTimeout(() => {
+        toTime();
+    }, debounceDelay);
 }
 
 function toTime(){
@@ -83,6 +199,15 @@ function toTime(){
     }
 }
 
+// 手动转换时间戳转时间（添加到历史记录）
+function toTimeWithHistory(){
+    toTime();
+    // 只有在转换成功时才添加到历史记录
+    if (outputTime.value && outputTime.value !== '转换失败') {
+        addToHistory('timestamp2time', inputTimeTamp.value, outputTime.value, selectTimeZone.value);
+    }
+}
+
 // 时间转时间戳
 function onDateTimeInput() {
     const inputValue = inputDateTime.value.trim();
@@ -90,7 +215,16 @@ function onDateTimeInput() {
         outputTimestamp.value = '';
         return;
     }
-    toTimestamp();
+    
+    // 清除之前的防抖定时器
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+    
+    // 设置新的防抖定时器
+    debounceTimer = setTimeout(() => {
+        toTimestamp();
+    }, debounceDelay);
 }
 
 function toTimestamp(){
@@ -144,6 +278,15 @@ function toTimestamp(){
     }
 }
 
+// 手动转换时间转时间戳（添加到历史记录）
+function toTimestampWithHistory(){
+    toTimestamp();
+    // 只有在转换成功时才添加到历史记录
+    if (outputTimestamp.value && outputTimestamp.value !== '时间格式错误') {
+        addToHistory('time2timestamp', inputDateTime.value, outputTimestamp.value, selectTimeZone.value);
+    }
+}
+
 // 监听时区变化，自动重新计算
 watch(selectTimeZone, () => {
     if (inputTimeTamp.value.trim()) {
@@ -169,11 +312,20 @@ onMounted(() => {
     allCountry.value = [];
     
     selectByTimeZone();
+    
+    // 加载历史记录
+    loadHistoryFromStorage();
 })
 
 onBeforeUnmount(() => {
     clearInterval(timer)
     timer = 0
+    
+    // 清理防抖定时器
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+    }
 })
 </script>
 
@@ -258,7 +410,7 @@ onBeforeUnmount(() => {
                         <el-button 
                             type="primary" 
                             size="large" 
-                            @click="toTime"
+                            @click="toTimeWithHistory"
                             class="convert-btn"
                         >
                             转换
@@ -317,7 +469,7 @@ onBeforeUnmount(() => {
                         <el-button 
                             type="primary" 
                             size="large" 
-                            @click="toTimestamp"
+                            @click="toTimestampWithHistory"
                             class="convert-btn"
                         >
                             转换
@@ -348,6 +500,72 @@ onBeforeUnmount(() => {
                                 />
                             </template>
                         </el-input>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录区域 -->
+        <div class="history-section" v-if="historyRecords.length > 0">
+            <div class="history-header">
+                <div class="history-title">
+                    <el-icon class="history-icon"><Document /></el-icon>
+                    <h2 class="history-title-text">转换历史记录</h2>
+                    <span class="history-count">({{ historyRecords.length }} 条)</span>
+                </div>
+                <el-button 
+                    type="danger" 
+                    size="small" 
+                    :icon="Delete"
+                    @click="clearAllHistory"
+                >
+                    清空历史
+                </el-button>
+            </div>
+            
+            <div class="history-list">
+                <div 
+                    v-for="record in historyRecords" 
+                    :key="record.id" 
+                    class="history-item"
+                    @click="useHistoryRecord(record)"
+                >
+                    <div class="history-content">
+                        <div class="history-type">
+                            <el-icon class="type-icon">
+                                <ArrowRight v-if="record.type === 'timestamp2time'" />
+                                <ArrowLeft v-else />
+                            </el-icon>
+                            <span class="type-text">
+                                {{ record.type === 'timestamp2time' ? '时间戳转时间' : '时间转时间戳' }}
+                            </span>
+                        </div>
+                        <div class="history-details">
+                            <div class="history-input">
+                                <span class="label">输入:</span>
+                                <span class="value">{{ record.input }}</span>
+                            </div>
+                            <div class="history-output">
+                                <span class="label">输出:</span>
+                                <span class="value">{{ record.output }}</span>
+                            </div>
+                            <div class="history-timezone">
+                                <span class="label">时区:</span>
+                                <span class="value">{{ record.timezone }}</span>
+                            </div>
+                        </div>
+                        <div class="history-time">
+                            {{ formatHistoryTime(record.timestamp) }}
+                        </div>
+                    </div>
+                    <div class="history-actions">
+                        <el-button 
+                            type="danger" 
+                            size="small" 
+                            :icon="Delete"
+                            @click.stop="removeHistoryRecord(record.id)"
+                            circle
+                        />
                     </div>
                 </div>
             </div>
@@ -390,6 +608,10 @@ onBeforeUnmount(() => {
     color: var(--bTextColor);
     opacity: 0.8;
     margin: 0;
+}
+
+.header-actions {
+    margin-top: 16px;
 }
 
 /* 当前时间区域 */
@@ -691,6 +913,234 @@ html.dark .tool-section {
     
     .convert-btn {
         height: 44px;
+    }
+}
+
+/* 历史记录样式 */
+.history-section {
+    background: var(--el-bg-color);
+    border-radius: 20px;
+    padding: 32px;
+    margin-top: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--el-border-color-lighter);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.history-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.history-icon {
+    font-size: 1.5rem;
+    color: var(--el-color-primary);
+}
+
+.history-title-text {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+    margin: 0;
+}
+
+.history-count {
+    font-size: 0.9rem;
+    color: var(--el-text-color-regular);
+    font-weight: 400;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--el-bg-color);
+}
+
+.history-item:hover {
+    border-color: var(--el-color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.history-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-type {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.type-icon {
+    font-size: 0.9rem;
+    color: var(--el-color-primary);
+}
+
+.type-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+}
+
+.history-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.history-input,
+.history-output,
+.history-timezone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.label {
+    color: var(--el-text-color-secondary);
+    min-width: 40px;
+}
+
+.value {
+    color: var(--el-text-color-primary);
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    word-break: break-all;
+}
+
+.history-time {
+    font-size: 0.75rem;
+    color: var(--el-text-color-placeholder);
+}
+
+.history-actions {
+    flex-shrink: 0;
+}
+
+/* 深色模式适配 */
+html.dark .history-section {
+    background: var(--el-bg-color-overlay);
+    border-color: var(--el-border-color);
+}
+
+html.dark .history-item {
+    background: var(--el-bg-color-overlay);
+    border-color: var(--el-border-color);
+}
+
+html.dark .history-item:hover {
+    border-color: var(--el-color-primary);
+    background: var(--el-bg-color);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .history-section {
+        padding: 24px;
+        margin-top: 24px;
+        border-radius: 16px;
+    }
+    
+    .history-header {
+        margin-bottom: 20px;
+    }
+    
+    .history-title-text {
+        font-size: 1.2rem;
+    }
+    
+    .history-item {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    .history-details {
+        gap: 2px;
+    }
+    
+    .history-input,
+    .history-output,
+    .history-timezone {
+        font-size: 0.8rem;
+    }
+    
+    .label {
+        min-width: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .history-section {
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 12px;
+    }
+    
+    .history-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    
+    .history-title {
+        gap: 8px;
+    }
+    
+    .history-title-text {
+        font-size: 1.1rem;
+    }
+    
+    .history-item {
+        padding: 10px;
+        gap: 6px;
+    }
+    
+    .history-type {
+        margin-bottom: 6px;
+    }
+    
+    .history-details {
+        margin-bottom: 6px;
+    }
+    
+    .history-input,
+    .history-output,
+    .history-timezone {
+        font-size: 0.75rem;
+    }
+    
+    .label {
+        min-width: 30px;
+    }
+    
+    .history-time {
+        font-size: 0.7rem;
     }
 }
 </style>
