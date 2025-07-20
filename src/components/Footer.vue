@@ -82,50 +82,66 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="footer">
-        <el-row style="border-bottom-color: var(--menuBorderColor)">
-            <el-col :span="8">
-                <el-row>
-                    <el-col :span="8">
-                        <el-link :underline="false" href="https://github.com/520MianXiangDuiXiang520"
-                            type="info">GitHub</el-link>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-link :underline="false" href="https://blog.csdn.net/zjbyough" type="info">CSDN</el-link>
-                    </el-col>
-                    <el-col :span="8">
-                        <el-link :underline="false" href="mailto:15364968962@163.com" type="info">Email</el-link>
-                    </el-col>
-                </el-row>
-            </el-col>
-            <el-col :span="8">
-                <el-row>
-                    <el-col :span="24"><el-link :underline="false"
-                            href="https://beian.miit.gov.cn/">陇ICP备20000438号-1</el-link></el-col>
-                    <el-col :underline="false" :span="24"><el-link type="info">© 2019-{{ year }} JuneBao
-                        </el-link></el-col>
+    <footer class="footer">
+        <div class="footer-content">
+            <!-- 左侧：外部链接 -->
+            <div class="footer-section">
+                <div class="external-links">
+                    <el-link :underline="false" href="https://github.com/520MianXiangDuiXiang520" type="info" size="small">
+                        GitHub
+                    </el-link>
+                    <el-divider direction="vertical" />
+                    <el-link :underline="false" href="https://blog.csdn.net/zjbyough" type="info" size="small">
+                        CSDN
+                    </el-link>
+                    <el-divider direction="vertical" />
+                    <el-link :underline="false" href="mailto:15364968962@163.com" type="info" size="small">
+                        Email
+                    </el-link>
+                </div>
+            </div>
 
-                </el-row>
-            </el-col>
-            <el-col :span="8">
-                <el-row>
-                    <el-col :underline="false" :span="12"> <el-link href="" type="info">SiteMap</el-link></el-col>
+            <!-- 中间：版权信息和备案号 -->
+            <div class="footer-section">
+                <div class="copyright">
+                    <el-text size="small" type="info">© 2019-{{ year }} JuneBao</el-text>
+                </div>
+                <div class="beian">
+                    <el-link :underline="false" href="https://beian.miit.gov.cn/" type="info" size="small">
+                        陇ICP备20000438号-1
+                    </el-link>
+                </div>
+            </div>
 
-                    <el-col v-if="!logined" :underline="false" :span="12"><el-link @click="openAdminLoginDialog()"
-                            type="info">AdminLogin</el-link></el-col>
-                    <el-row v-else>
-                        <el-col :underline="false" :span="24"><el-link @click="doAdminLogoutReq()"
-                                type="info">Logout</el-link></el-col>
-                        <el-col :underline="false" :span="24"><el-link @click="goNewArticle()"
-                                type="info">NewArticle</el-link></el-col>
-                    </el-row>
+            <!-- 右侧：管理功能 -->
+            <div class="footer-section">
+                <div class="admin-links">
+                    <el-link :underline="false" href="" type="info" size="small">SiteMap</el-link>
+                    
+                    <template v-if="!logined">
+                        <el-divider direction="vertical" />
+                        <el-link :underline="false" @click="openAdminLoginDialog()" type="info" size="small">
+                            AdminLogin
+                        </el-link>
+                    </template>
+                    
+                    <template v-else>
+                        <el-divider direction="vertical" />
+                        <el-link :underline="false" @click="doAdminLogoutReq()" type="info" size="small">
+                            Logout
+                        </el-link>
+                        <el-divider direction="vertical" />
+                        <el-link :underline="false" @click="goNewArticle()" type="info" size="small">
+                            NewArticle
+                        </el-link>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-                </el-row>
-            </el-col>
-        </el-row>
-    </div>
-
-    <el-dialog v-model="adminLoginDialogVisible" title="AdminLogin" width="500">
+    <!-- 管理员登录对话框 -->
+    <el-dialog v-model="adminLoginDialogVisible" title="AdminLogin" width="400" :close-on-click-modal="false">
         <el-form>
             <el-form-item label="UserName">
                 <el-input v-model="adminLoginReq.username" autocomplete="off" />
@@ -147,11 +163,77 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.el-row {
+.footer {
+    margin-top: 60px;
+    padding: 20px 0;
+    border-top: 1px solid var(--el-border-color-lighter);
+    background-color: var(--el-bg-color);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.copyright {
     text-align: center;
 }
 
-.footer {
-    border-top-color: #1573d1;
+.beian {
+    text-align: center;
+}
+
+.external-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .footer-section {
+        width: 100%;
+    }
+    
+    .external-links,
+    .admin-links {
+        justify-content: center;
+    }
+}
+
+/* 链接悬停效果 */
+.el-link:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+/* 分割线样式 */
+.el-divider--vertical {
+    height: 14px;
+    margin: 0 4px;
 }
 </style>
