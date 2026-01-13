@@ -76,6 +76,10 @@ function goHome() {
     margin-right: auto;
 }
 
+.el-menu--horizontal>.el-menu-item:nth-child(1) img {
+    cursor: pointer;
+}
+
 .menu {
     background-color: rgba(25, 25, 25, 0);
     /* backdrop-filter: blur(7px);  */

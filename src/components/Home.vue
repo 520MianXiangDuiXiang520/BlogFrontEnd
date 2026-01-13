@@ -216,5 +216,10 @@ onMounted(() => {
 
 .title {
     color: var(--titleColor);
+    cursor: pointer;
+}
+
+.abstract {
+    cursor: pointer;
 }
 </style>
